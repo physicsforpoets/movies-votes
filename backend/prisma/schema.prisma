@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String   @id @default(uuid())
+  username String   @unique
+  created  DateTime @default(now())
+  lists    List[]
+  role     Role     @default(user)
+}
+
+model List {
+  id           String   @id @default(uuid())
+  name         String
+  active       Boolean  @default(false)
+  votingActive Boolean  @default(false)
+  created      DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  movies       Movie[]
+}
+
+model Movie {
+  id              String    @id @default(uuid())
+  title           String
+  posterUrl       String?
+  securePosterUrl String?
+  trailerUrl      String?
+  tmdbId          Int?
+  rating          Rating    @default(NR)
+  scary           Boolean   @default(false)
+  watched         Boolean   @default(false)
+  releaseDate     DateTime  @db.Date
+  description     String
+  sortTitle       String
+  created         DateTime  @default(now())
+  services        Service[]
+  votes           Vote[]
+  list            List      @relation(fields: [listId], references: [id])
+  listId          String
+}
+
+model Service {
+  id      String   @id @default(uuid())
+  name    String
+  logoUrl String
+  created DateTime @default(now())
+  movies  Movie[]
+}
+
+model Vote {
+  movie    Movie    @relation(fields: [movieId], references: [id])
+  movieId  String
+  deviceId String
+  created  DateTime @default(now())
+
+  @@id([movieId, deviceId])
+}
+
+enum Rating {
+  NR
+  G
+  PG
+  PG13
+  R
+  NC17
+}
+
+enum Role {
+  user
+  admin
+}

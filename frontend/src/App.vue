@@ -1,0 +1,78 @@
+<script setup>
+import { onMounted } from 'vue';
+import { RouterView } from 'vue-router';
+import GridIcon from './components/icons/GridIcon.vue';
+import ListIcon from './components/icons/ListIcon.vue';
+</script>
+
+<template>
+  <div class="app">
+    <RouterView class="app-body" />
+    <nav class="app-nav">
+      <ul>
+        <li>
+          <RouterLink class="link" :to="{ name: 'list' }">
+            <GridIcon />
+            <span>Browse</span>
+          </RouterLink>
+        </li>
+        <li>
+          <RouterLink class="link" :to="{ name: 'standings' }">
+            <ListIcon />
+            <span>Standings</span>
+          </RouterLink>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</template>
+
+<style scoped>
+  .app-nav {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    bottom: 0;
+    color: white;
+    height: 60px;
+    left: 0;
+    padding: 0;
+    position: fixed;
+    width: 100%;
+  }
+
+  .app-nav .link {
+    align-items: center;
+    color: white;
+    display: flex;
+    gap: 4px;
+    font-size: 14px;
+    font-family: var(--mv-ff-sans-serif);
+    font-weight: var(--mv-fw-bold);
+    opacity: 0.6;
+    text-decoration: none;
+  }
+
+  .app-nav .link.router-link-active {
+    opacity: 1;
+  }
+
+  .app-nav ul {
+    align-items: center;
+    display: flex;
+    justify-content: space-around;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    height: 60px;
+  }
+
+  .app-nav ul > li {
+    margin: 0;
+    padding: 0;
+  }
+
+  .app-nav svg {
+    height: 18px;
+    width: 18px;
+  }
+</style>
