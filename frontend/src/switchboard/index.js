@@ -1,4 +1,5 @@
-const BASE_URL = process.env.NODE_ENV === 'production' ? 'prod url' : 'http://localhost:3000/api';
+// TODO: Get this entire URL from an environment var?
+const BASE_URL = process.env.NODE_ENV === 'production' ? 'https://movies-votes-production.up.railway.app/' : 'http://localhost:3000/api';
 
 // TODO: Try/Catch, Error Handling
 
