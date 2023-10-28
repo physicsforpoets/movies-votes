@@ -35,7 +35,7 @@ app.use((req, res, next) => {
     res.cookie('deviceId', deviceId, { 
       maxAge,
       sameSite: 'none',
-      secure: false,
+      secure: 'false',
     });
   } else {
     res.locals.deviceId = deviceId;
