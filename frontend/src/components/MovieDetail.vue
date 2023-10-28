@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { storeToRefs } from 'pinia';
+import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 
 import { useVotesStore } from '../stores/votes';
 import { useListStore } from '../stores/list';
@@ -27,8 +28,7 @@ const props = defineProps({
   movie: { type: Object, required: true },
 });
 const emit = defineEmits(['close']);
-const container = ref(null);
-const scrollPosition = ref(null);
+// const scrollPosition = ref(null);
 
 // Store bindings
 
@@ -109,13 +109,15 @@ const onWatchedClick = () => {
 // Lifecycle
 
 onMounted(async () => {
-  // Lock scrolling
-  const $body = document.querySelector('body');
-  scrollPosition.value = window.pageYOffset;
-  $body.style.overflow = 'hidden';
-  $body.style.position = 'fixed';
-  $body.style.top = `-${scrollPosition.value}px`;
-  $body.style.width = '100%';
+  disableBodyScroll(document.querySelector('.movie-detail'));
+
+  // Lock scrolling - this also didn't work
+  // const $body = document.querySelector('body');
+  // scrollPosition.value = window.pageYOffset;
+  // $body.style.overflow = 'hidden';
+  // $body.style.position = 'fixed';
+  // $body.style.top = `-${scrollPosition.value}px`;
+  // $body.style.width = '100%';
   
   // Does not work on iOS
   // document.body.style.overflowY = 'hidden';
@@ -127,12 +129,15 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-  const $body = document.querySelector('body');
-  $body.style.removeProperty('overflow');
-  $body.style.removeProperty('position');
-  $body.style.removeProperty('top');
-  $body.style.removeProperty('width');
-  window.scrollTo(0, scrollPosition.value);
+  enableBodyScroll(document.querySelector('.movie-detail'));
+  clearAllBodyScrollLocks();
+
+  // const $body = document.querySelector('body');
+  // $body.style.removeProperty('overflow');
+  // $body.style.removeProperty('position');
+  // $body.style.removeProperty('top');
+  // $body.style.removeProperty('width');
+  // window.scrollTo(0, scrollPosition.value);
 
   // Does not work on iOS
   // document.body.style.overflowY = 'auto';
@@ -142,7 +147,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="movie-detail">
-    <div class="protection" ref="container"></div>
+    <div class="protection"></div>
     <LoadingSpinner v-if="!isReady" class="loading-spinner" />
     <div v-else class="modal">
       <div class="hero">
