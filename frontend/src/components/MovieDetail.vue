@@ -1,7 +1,11 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
+import {
+  disableBodyScroll,
+  enableBodyScroll,
+  clearAllBodyScrollLocks,
+} from 'body-scroll-lock-upgrade';
 
 import { useVotesStore } from '../stores/votes';
 import { useListStore } from '../stores/list';
