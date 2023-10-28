@@ -82,7 +82,7 @@ const watchedMovies = computed(() => {
 
 <style scoped>
   .ranked-view {
-    padding: 0 16px;
+    padding: 0 16px 80px;
   }
 
   section {
