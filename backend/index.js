@@ -20,7 +20,9 @@ const port = process.env.PORT || 3000;
 app.use(cors({
   origin: true,
   credentials: true,
+  sameSite: 'none',
 }));
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
@@ -31,7 +33,7 @@ app.use((req, res, next) => {
     const deviceId = uuidv4();
     const maxAge = 1000 * 60 * 60 * 24 * 3; // 3 Day expry
     res.locals.deviceId = deviceId;
-    res.cookie('deviceId', deviceId, { maxAge, httpOnly: true });
+    res.cookie('deviceId', deviceId, { maxAge });
   } else {
     res.locals.deviceId = deviceId;
   }
