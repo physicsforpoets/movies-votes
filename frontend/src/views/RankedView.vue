@@ -22,7 +22,7 @@ onMounted(async () => {
 });
 
 const rankedMovies = computed(() => {
-  const ranked = movies.value.filter(movie => movie._count?.votes > 0);
+  const ranked = movies.value.filter(movie => !movie.watched).filter(movie => movie._count?.votes > 0);
   return ranked.sort((a, b) => {
     return b._count.votes - a._count.votes;
   });
