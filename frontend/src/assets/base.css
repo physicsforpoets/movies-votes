@@ -42,3 +42,13 @@ body {
   font-weight: normal;
   position: relative;
 }
+
+html.noscroll,
+body.noscroll {
+  /* when modal active */
+  touch-action: none;
+  -webkit-overflow-scrolling: none;
+  overflow: hidden;
+  /* Other browsers */
+  overscroll-behavior: none;
+}

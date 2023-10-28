@@ -1,11 +1,6 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import {
-  disableBodyScroll,
-  enableBodyScroll,
-  clearAllBodyScrollLocks,
-} from 'body-scroll-lock-upgrade';
 
 import { useVotesStore } from '../stores/votes';
 import { useListStore } from '../stores/list';
@@ -32,7 +27,6 @@ const props = defineProps({
   movie: { type: Object, required: true },
 });
 const emit = defineEmits(['close']);
-// const scrollPosition = ref(null);
 
 // Store bindings
 
@@ -113,19 +107,10 @@ const onWatchedClick = () => {
 // Lifecycle
 
 onMounted(async () => {
-  disableBodyScroll(document.querySelector('.movie-detail'));
-
-  // Lock scrolling - this also didn't work
-  // const $body = document.querySelector('body');
-  // scrollPosition.value = window.pageYOffset;
-  // $body.style.overflow = 'hidden';
-  // $body.style.position = 'fixed';
-  // $body.style.top = `-${scrollPosition.value}px`;
-  // $body.style.width = '100%';
-  
-  // Does not work on iOS
   // document.body.style.overflowY = 'hidden';
   // document.documentElement.style.overflowY = 'hidden';
+  document.querySelector('body').classList.add('noscroll');
+  document.querySelector('html').classList.add('noscroll');
 
   // Get TMDB data
   lookupData.value = await lookupMovie(props.movie.tmdbId);
@@ -133,19 +118,10 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-  enableBodyScroll(document.querySelector('.movie-detail'));
-  clearAllBodyScrollLocks();
-
-  // const $body = document.querySelector('body');
-  // $body.style.removeProperty('overflow');
-  // $body.style.removeProperty('position');
-  // $body.style.removeProperty('top');
-  // $body.style.removeProperty('width');
-  // window.scrollTo(0, scrollPosition.value);
-
-  // Does not work on iOS
   // document.body.style.overflowY = 'auto';
   // document.documentElement.style.overflowY = 'auto';
+  document.querySelector('body').classList.remove('noscroll');
+  document.querySelector('html').classList.remove('noscroll');
 });
 </script>
 
