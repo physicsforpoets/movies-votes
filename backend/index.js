@@ -24,25 +24,26 @@ app.use(cors({
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cookieParser());
+// app.use(cookieParser());
 
-app.use((req, res, next) => {
-  const deviceId = req.cookies.deviceId;
-  if (!deviceId) {
-    const deviceId = uuidv4();
-    const maxAge = 1000 * 60 * 60 * 24 * 3; // 3 Day expry
-    res.locals.deviceId = deviceId;
-    res.cookie('deviceId', deviceId, { 
-      maxAge,
-      sameSite: 'none',
-      secure: 'false',
-      domain: 'halloweenflicks.com',
-    });
-  } else {
-    res.locals.deviceId = deviceId;
-  }
-  next();
-});
+// HEY this doesn't work on iOS
+// app.use((req, res, next) => {
+//   const deviceId = req.cookies.deviceId;
+//   if (!deviceId) {
+//     const deviceId = uuidv4();
+//     const maxAge = 1000 * 60 * 60 * 24 * 3; // 3 Day expry
+//     res.locals.deviceId = deviceId;
+//     res.cookie('deviceId', deviceId, { 
+//       maxAge,
+//       sameSite: 'none',
+//       secure: 'false',
+//       domain: 'halloweenflicks.com',
+//     });
+//   } else {
+//     res.locals.deviceId = deviceId;
+//   }
+//   next();
+// });
 
 // Routes
 app.use('/api/lists', listRoutes);

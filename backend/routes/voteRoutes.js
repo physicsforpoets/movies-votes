@@ -5,7 +5,13 @@ const prisma = new PrismaClient();
 const router = express.Router();
 
 router.get('/mine', async (req, res) => {
-  if (!res.locals.deviceId) {
+  // if (!res.locals.deviceId) {
+  //   res.status(500).json({ message: 'Unknown device.' });
+  //   return;
+  // }
+
+  const deviceId = req.get('X-STAT-deviceId');
+  if (!deviceId) {
     res.status(500).json({ message: 'Unknown device.' });
     return;
   }
@@ -13,7 +19,7 @@ router.get('/mine', async (req, res) => {
   try {
     const votes = await prisma.vote.findMany({
       where: {
-        deviceId: res.locals.deviceId,
+        deviceId: deviceId,
       },
       select: {
         movieId: true,
@@ -29,14 +35,20 @@ router.get('/mine', async (req, res) => {
 });
 
 router.post('/:movieId', async (req, res) => {
-  if (!res.locals.deviceId) {
+  // if (!res.locals.deviceId) {
+  //   res.status(500).json({ message: 'Unknown device.' });
+  //   return;
+  // }
+
+  const deviceId = req.get('X-STAT-deviceId');
+  if (!deviceId) {
     res.status(500).json({ message: 'Unknown device.' });
     return;
   }
 
   const data = {
     movieId: req.params.movieId,
-    deviceId: res.locals.deviceId,
+    deviceId: deviceId,
   };
 
   try {
@@ -57,7 +69,13 @@ router.post('/:movieId', async (req, res) => {
 });
 
 router.delete('/:movieId', async (req, res) => {
-  if (!res.locals.deviceId) {
+  // if (!res.locals.deviceId) {
+  //   res.status(500).json({ message: 'Unknown device.' });
+  //   return;
+  // }
+
+  const deviceId = req.get('X-STAT-deviceId');
+  if (!deviceId) {
     res.status(500).json({ message: 'Unknown device.' });
     return;
   }
@@ -68,7 +86,7 @@ router.delete('/:movieId', async (req, res) => {
     const vote = await prisma.vote.deleteMany({
       where: {
         movieId: req.params.movieId,
-        deviceId: res.locals.deviceId,
+        deviceId: deviceId,
       },
     });
     res.status(200).json(vote);

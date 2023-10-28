@@ -28,6 +28,18 @@ const getServices = async () => {
   return services;
 };
 
+const getSessionId = () => {
+  const deviceId = window.localStorage.getItem('deviceId');
+  
+  if(!deviceId) {
+    const newId = Date.now();
+    window.localStorage.setItem('deviceId', newId);
+    return newId;
+  } 
+  
+  return deviceId;
+}
+
 const searchMovie = async (query) => {
   const url = `${BASE_URL}/lookup/search/movie?query=${query}`;
   const response = await fetch(url, defaultOptions);
@@ -57,7 +69,10 @@ const addMovie = async (movie) => {
 
 const getMyVotes = async () => {
   const url = `${BASE_URL}/votes/mine`;
-  const response = await fetch(url, defaultOptions);
+  const deviceId = getSessionId();
+  const response = await fetch(url, { ...defaultOptions, headers: {
+    'X-STAT-deviceId': deviceId
+  }});
   const votes = await response.json();
   return votes;
 };
@@ -65,20 +80,28 @@ const getMyVotes = async () => {
 const addVote = async (movieId) => {
   // NOTE:
   // Should this be POST /votes with { movieId } payload?
+  const deviceId = getSessionId();
   const url = `${BASE_URL}/votes/${movieId}`;
   const response = await fetch(url, { 
     ...defaultOptions,
     method: 'POST',
+    headers: {
+      'X-STAT-deviceId': deviceId
+    }
   });
   const votes = await response.json();
   return votes;
 };
 
 const removeVote = async (movieId) => {
+  const deviceId = getSessionId();
   const url = `${BASE_URL}/votes/${movieId}`;
   const response = await fetch(url, { 
     ...defaultOptions,
     method: 'DELETE',
+    headers: {
+      'X-STAT-deviceId': deviceId
+    }
   });
   const result = await response.json();
   return result;
