@@ -29,13 +29,8 @@ import ListIcon from './components/icons/ListIcon.vue';
 
 <style scoped>
   .app-nav {
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
     bottom: 0;
-    color: white;
-    height: 60px;
     left: 0;
-    padding: 0;
     position: fixed;
     width: 100%;
   }
@@ -57,13 +52,16 @@ import ListIcon from './components/icons/ListIcon.vue';
   }
 
   .app-nav ul {
-    align-items: center;
+    align-items: flex-start;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    color: white;
     display: flex;
     justify-content: space-around;
     list-style: none;
     margin: 0;
-    padding: 0;
-    height: 60px;
+    padding: 16px 0 0;
+    height: 68px;
   }
 
   .app-nav ul > li {

@@ -21,7 +21,6 @@ const listId = '24b7b22d-684b-491c-846a-f05d26c7faa1';
 
 // Page Status
 const loading = ref(true);
-const isReady = ref(false);
 
 // Store mapping
 const listStore = useListStore();
@@ -212,7 +211,7 @@ onMounted(async () => {
   }
 
   .app-hero {
-    aspect-ratio: 9 / 13;
+    aspect-ratio: 10 / 13;
     display: flex;
     align-items: flex-end;
     padding-bottom: 24px;

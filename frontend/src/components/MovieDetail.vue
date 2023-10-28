@@ -1,7 +1,6 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 
 import { useVotesStore } from '../stores/votes';
 import { useListStore } from '../stores/list';
@@ -109,13 +108,13 @@ const onWatchedClick = () => {
 // Lifecycle
 
 onMounted(async () => {
-  disableBodyScroll(container);
+  document.body.style.overflowY = 'hidden';
   lookupData.value = await lookupMovie(props.movie.tmdbId);
   isReady.value = true;
 });
 
 onBeforeUnmount(() => {
-  clearAllBodyScrollLocks();
+  document.body.style.overflowY = 'auto';
 });
 </script>
 
