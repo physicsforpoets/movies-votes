@@ -36,6 +36,7 @@ app.use((req, res, next) => {
       maxAge,
       sameSite: 'none',
       secure: 'false',
+      domain: 'halloweenflicks.com',
     });
   } else {
     res.locals.deviceId = deviceId;
