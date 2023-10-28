@@ -28,6 +28,7 @@ const props = defineProps({
 });
 const emit = defineEmits(['close']);
 const container = ref(null);
+const scrollPosition = ref(null);
 
 // Store bindings
 
@@ -108,15 +109,34 @@ const onWatchedClick = () => {
 // Lifecycle
 
 onMounted(async () => {
-  document.body.style.overflowY = 'hidden';
-  document.documentElement.style.overflowY = 'hidden';
+  // Lock scrolling
+  const $body = document.querySelector('body');
+  scrollPosition.value = window.pageYOffset;
+  $body.style.overflow = 'hidden';
+  $body.style.position = 'fixed';
+  $body.style.top = `-${scrollPosition.value}px`;
+  $body.style.width = '100%';
+  
+  // Does not work on iOS
+  // document.body.style.overflowY = 'hidden';
+  // document.documentElement.style.overflowY = 'hidden';
+
+  // Get TMDB data
   lookupData.value = await lookupMovie(props.movie.tmdbId);
   isReady.value = true;
 });
 
 onBeforeUnmount(() => {
-  document.body.style.overflowY = 'auto';
-  document.documentElement.style.overflowY = 'auto';
+  const $body = document.querySelector('body');
+  $body.style.removeProperty('overflow');
+  $body.style.removeProperty('position');
+  $body.style.removeProperty('top');
+  $body.style.removeProperty('width');
+  window.scrollTo(0, scrollPosition.value);
+
+  // Does not work on iOS
+  // document.body.style.overflowY = 'auto';
+  // document.documentElement.style.overflowY = 'auto';
 });
 </script>
 
