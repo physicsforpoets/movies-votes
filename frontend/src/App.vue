@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted } from 'vue';
 import { RouterView } from 'vue-router';
 import GridIcon from './components/icons/GridIcon.vue';
 import ListIcon from './components/icons/ListIcon.vue';
@@ -61,7 +60,7 @@ import ListIcon from './components/icons/ListIcon.vue';
     list-style: none;
     margin: 0;
     padding: 16px 0 0;
-    height: 68px;
+    height: 74px;
   }
 
   .app-nav ul > li {

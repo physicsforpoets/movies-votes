@@ -109,12 +109,14 @@ const onWatchedClick = () => {
 
 onMounted(async () => {
   document.body.style.overflowY = 'hidden';
+  document.documentElement.style.overflowY = 'hidden';
   lookupData.value = await lookupMovie(props.movie.tmdbId);
   isReady.value = true;
 });
 
 onBeforeUnmount(() => {
   document.body.style.overflowY = 'auto';
+  document.documentElement.style.overflowY = 'auto';
 });
 </script>
 

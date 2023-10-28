@@ -16,26 +16,6 @@
 
   --mv-ff-sans-serif: 'IBM Plex Sans', sans-serif;
   --mv-ff-serif: 'PT Serif', serif;
-
-  /* --admin-white: #ffffff;
-  --admin-white-soft: #f8f8f8;
-  --admin-white-mute: #f2f2f2;
-
-  --admin-black: #181818;
-  --admin-black-soft: #222222;
-  --admin-black-mute: #282828;
-
-  --admin-indigo: #2c3e50;
-
-  --admin-divider-light-1: rgba(60, 60, 60, 0.29);
-  --admin-divider-light-2: rgba(60, 60, 60, 0.12);
-  --admin-divider-dark-1: rgba(84, 84, 84, 0.65);
-  --admin-divider-dark-2: rgba(84, 84, 84, 0.48);
-
-  --admin-text-light-1: var(--admin-indigo);
-  --admin-text-light-2: rgba(60, 60, 60, 0.66);
-  --admin-text-dark-1: var(--admin-white);
-  --admin-text-dark-2: rgba(235, 235, 235, 0.64); */
 }
 
 /* semantic color variables for this project */
@@ -43,13 +23,6 @@
   --color-background: var(--mv-grey-dark);
   --color-text: var(--mv-text-light);
 }
-
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: var(--admin-black);
-    --color-text: var(--admin-text-dark-2);
-  }
-} */
 
 *,
 *::before,
@@ -59,6 +32,7 @@
 }
 
 body {
+  height: 100%;
   min-height: 100vh;
   color: var(--color-text);
   background: var(--color-background);
@@ -66,7 +40,5 @@ body {
   font-family: var(--mv-ff-sans-serif);
   font-size: 12px;
   font-weight: normal;
-  /* text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale; */
+  position: relative;
 }

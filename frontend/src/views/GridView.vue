@@ -211,8 +211,8 @@ onMounted(async () => {
   }
 
   .app-hero {
-    aspect-ratio: 10 / 13;
     display: flex;
+    height: 130vw;
     align-items: flex-end;
     padding-bottom: 24px;
     position: relative;
