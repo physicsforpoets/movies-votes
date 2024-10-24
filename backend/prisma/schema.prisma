@@ -23,6 +23,7 @@ model List {
   name         String
   active       Boolean  @default(false)
   votingActive Boolean  @default(false)
+  votingRound  Int      @default(0)
   created      DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id])
   userId       String
@@ -30,23 +31,33 @@ model List {
 }
 
 model Movie {
-  id              String    @id @default(uuid())
+  id              String     @id @default(uuid())
   title           String
   posterUrl       String?
   securePosterUrl String?
   trailerUrl      String?
   tmdbId          Int?
-  rating          Rating    @default(NR)
-  scary           Boolean   @default(false)
-  watched         Boolean   @default(false)
-  releaseDate     DateTime  @db.Date
+  rating          Rating     @default(NR)
+  scary           Boolean    @default(false)
+  watched         Boolean    @default(false)
+  releaseDate     DateTime   @db.Date
   description     String
   sortTitle       String
-  created         DateTime  @default(now())
+  created         DateTime   @default(now())
   services        Service[]
   votes           Vote[]
-  list            List      @relation(fields: [listId], references: [id])
+  favorites       Favorite[]
+  list            List       @relation(fields: [listId], references: [id])
   listId          String
+}
+
+model Favorite {
+  deviceId String
+  movie    Movie    @relation(fields: [movieId], references: [id])
+  movieId  String
+  created  DateTime @default(now())
+
+  @@id([movieId, deviceId])
 }
 
 model Service {
@@ -61,9 +72,10 @@ model Vote {
   movie    Movie    @relation(fields: [movieId], references: [id])
   movieId  String
   deviceId String
+  round    Int
   created  DateTime @default(now())
 
-  @@id([movieId, deviceId])
+  @@id([movieId, deviceId, round])
 }
 
 enum Rating {
