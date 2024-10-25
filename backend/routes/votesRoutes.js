@@ -4,56 +4,36 @@ import { PrismaClient, Prisma } from '@prisma/client';
 const prisma = new PrismaClient();
 const router = express.Router();
 
-router.get('/mine', async (req, res) => {
-  // if (!res.locals.deviceId) {
-  //   res.status(500).json({ message: 'Unknown device.' });
-  //   return;
-  // }
-
+router.post('/movie/:movieId/round/active', async (req, res) => {
+  const movieId = req.params.movieId;
   const deviceId = req.get('X-STAT-deviceId');
-  if (!deviceId) {
-    res.status(500).json({ message: 'Unknown device.' });
-    return;
-  }
 
+  let data;
   try {
-    const votes = await prisma.vote.findMany({
-      where: {
-        deviceId: deviceId,
-      },
-      select: {
-        movieId: true,
-      },
-    });
+      // Check that movie's list is active and voting is active, get active round
+      // NOTE: Raw query with subquery for round # could be more efficient than 2 queries
+      const movie = await prisma.movie.findFirstOrThrow({
+        where: {
+          id: movieId,
+          list: {
+            active: true,
+            votingActive: true,
+            votingRound: { gt: 0 },
+          },
+        },
+        include: { list: true },
+      });
 
-    // Just return an array of movie IDs
-    const votesParsed = { votes: votes.map(vote => vote.movieId) };
-    res.status(200).json(votesParsed);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+      data = {
+        deviceId,
+        movieId,
+        round: movie.list.votingRound,
+      };
 
-router.post('/:movieId', async (req, res) => {
-  // if (!res.locals.deviceId) {
-  //   res.status(500).json({ message: 'Unknown device.' });
-  //   return;
-  // }
+      // TODO: Push client notification
 
-  const deviceId = req.get('X-STAT-deviceId');
-  if (!deviceId) {
-    res.status(500).json({ message: 'Unknown device.' });
-    return;
-  }
-
-  const data = {
-    movieId: req.params.movieId,
-    deviceId: deviceId,
-  };
-
-  try {
-    const vote = await prisma.vote.create({ data });
-    res.status(200).json(vote);
+      const vote = await prisma.vote.create({ data });
+      res.status(200).json(vote);
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError
@@ -68,28 +48,15 @@ router.post('/:movieId', async (req, res) => {
   }
 });
 
-router.delete('/:movieId', async (req, res) => {
-  // if (!res.locals.deviceId) {
-  //   res.status(500).json({ message: 'Unknown device.' });
-  //   return;
-  // }
-
+router.get('/mine', async (req, res) => {
   const deviceId = req.get('X-STAT-deviceId');
-  if (!deviceId) {
-    res.status(500).json({ message: 'Unknown device.' });
-    return;
-  }
-
   try {
-    // NOTE:
-    // .delete() wasn't working here for some reason - probably the composite key
-    const vote = await prisma.vote.deleteMany({
-      where: {
-        movieId: req.params.movieId,
-        deviceId: deviceId,
-      },
+    const votes = await prisma.vote.findMany({
+      where: { deviceId },
+      orderBy: { round: 'desc' },
+      include: { movie: true },
     });
-    res.status(200).json(vote);
+    res.status(200).json(votes);
   } catch (error) {
     console.error(error);
     res.status(400).json({ message: error.message });
