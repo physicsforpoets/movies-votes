@@ -63,4 +63,70 @@ router.get('/mine', async (req, res) => {
   }
 });
 
+router.get('/results', async (req, res) => {
+  /**
+   * Raw query is more efficient:
+      SELECT round, "Vote"."movieId", "Movie".title, "Movie"."roundWatched", count(*) AS votes
+      FROM "Vote"
+      LEFT JOIN "Movie" ON "Movie".id = "Vote"."movieId"
+      GROUP BY "movieId", round, title, "roundWatched"
+      ORDER BY round DESC, votes DESC
+   */
+
+  try {
+    // Get vote counts, rounds, and movieIds, then pull watched info. 
+    // Prisma doesn't appear to be able to combine these to a single query.
+    const votes = await prisma.vote.groupBy({
+      by: ['round', 'movieId'],
+      _count: { _all: true },
+      orderBy: [
+        { round: 'desc' },
+        { _count: { movieId: 'desc' } },
+      ],
+    });
+    
+    // grab unique movieIds
+    const movieIds = votes.reduce((acc, row) => {
+      if (!acc.includes(row.movieId)) {
+        acc.push(row.movieId);
+      }
+      return acc;
+    }, []);
+
+    // NOTE: Do I need this? All of the movies will presumably be in the movie store, data updated by push
+    //       This assumes movie store is _always_ up to date, probably fine as long as no changes after voting starts
+    const movies = await prisma.movie.findMany({
+      select: {
+        id: true,
+        roundWatched: true,
+      },
+      where: {
+        id: { in: movieIds },
+      },
+    });
+
+    const moviesParsed = movies.reduce((acc, row) => {
+      acc[row.id] = row;
+      return acc;
+    }, {});
+
+    const results = votes.map((row) => {
+      const movie = moviesParsed[row.movieId];
+      return {
+        round: row.round,
+        movieId: row.movieId,
+        votes: row._count._all,
+        winner: row.round === movie.roundWatched,
+      };
+    });
+
+    // NOTE: Is this a pain in the ass? Should I just have a voting round table with a winner?
+
+    res.status(200).json(results);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
 export default router

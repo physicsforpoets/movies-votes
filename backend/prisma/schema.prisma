@@ -39,7 +39,7 @@ model Movie {
   tmdbId          Int?
   rating          Rating     @default(NR)
   scary           Boolean    @default(false)
-  watched         Boolean    @default(false)
+  roundWatched    Int?
   releaseDate     DateTime   @db.Date
   description     String
   sortTitle       String
