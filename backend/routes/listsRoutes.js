@@ -34,12 +34,7 @@ router.get('/:id', async (req, res) => {
       },
       include: {
         movies: {
-          include: {
-            services: true,
-            _count: {
-              select: { votes: true }
-            },
-          },
+          include: { services: true },
         },
       },
     });
@@ -104,7 +99,7 @@ router.put('/:id/voting/select-movie/:movieId', async (req, res) => {
   }
 });
 
-// Get List Movies
+// Get List Movies - DEPRECATED?
 router.get('/:id/movies', async (req, res) => {
   // TODO: Move this logic to controllers - call the 'movieController' to get movies for list
   try {
@@ -125,7 +120,7 @@ router.get('/:id/movies', async (req, res) => {
   }
 });
 
-// Get List Standings
+// Get List Standings - DEPRECATED?
 router.get('/:id/standings', async (req, res) => {
   // TODO: Move this logic to controllers - call the 'votesController' ??? to get movies for standings
   try {

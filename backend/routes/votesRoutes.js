@@ -48,11 +48,15 @@ router.post('/movie/:movieId/round/active', async (req, res) => {
   }
 });
 
-router.get('/mine', async (req, res) => {
+router.get('/list/:listId/mine', async (req, res) => {
   const deviceId = req.get('X-STAT-deviceId');
+  const listId = req.params.listId;
   try {
     const votes = await prisma.vote.findMany({
-      where: { deviceId },
+      where: { 
+        deviceId,
+        movie: { listId },
+      },
       orderBy: { round: 'desc' },
       include: { movie: true },
     });
@@ -63,7 +67,7 @@ router.get('/mine', async (req, res) => {
   }
 });
 
-router.get('/results', async (req, res) => {
+router.get('/list/:listId/results', async (req, res) => {
   /**
    * Raw query is more efficient:
       SELECT round, "Vote"."movieId", "Movie".title, "Movie"."roundWatched", count(*) AS votes
@@ -72,12 +76,13 @@ router.get('/results', async (req, res) => {
       GROUP BY "movieId", round, title, "roundWatched"
       ORDER BY round DESC, votes DESC
    */
-
+  const listId = req.params.listId;
   try {
     // Get vote counts, rounds, and movieIds, then pull watched info. 
     // Prisma doesn't appear to be able to combine these to a single query.
     const votes = await prisma.vote.groupBy({
       by: ['round', 'movieId'],
+      where: { movie: { listId } },
       _count: { _all: true },
       orderBy: [
         { round: 'desc' },
