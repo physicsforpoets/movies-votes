@@ -94,11 +94,19 @@ router.get('/results', async (req, res) => {
     }, []);
 
     // NOTE: Do I need this? All of the movies will presumably be in the movie store, data updated by push
+    //       Should I just have a voting round table with a winner?
     //       This assumes movie store is _always_ up to date, probably fine as long as no changes after voting starts
     const movies = await prisma.movie.findMany({
       select: {
         id: true,
+        title: true,
+        sortTitle: true,
+        posterUrl: true,
+        securePosterUrl: true,
+        rating: true,
         roundWatched: true,
+        scary: true,
+        releaseDate: true,
       },
       where: {
         id: { in: movieIds },
@@ -110,17 +118,32 @@ router.get('/results', async (req, res) => {
       return acc;
     }, {});
 
-    const results = votes.map((row) => {
-      const movie = moviesParsed[row.movieId];
-      return {
-        round: row.round,
-        movieId: row.movieId,
-        votes: row._count._all,
-        winner: row.round === movie.roundWatched,
-      };
-    });
+    const results = [];
+    for (const i in votes) {
+      const vote = votes[i];
+      const idx = vote.round - 1;
+      const movie = moviesParsed[vote.movieId];
+      
+      if (!results[idx]) {
+        results[idx] = {
+          round: vote.round,
+          watchedMovieId: null,
+          watchedMovie: {},
+          votes: [],
+        };
+      }
 
-    // NOTE: Is this a pain in the ass? Should I just have a voting round table with a winner?
+      if (movie.roundWatched === vote.round) {
+        results[idx].watchedMovieId = vote.movieId;
+        results[idx].watchedMovie = movie;
+      }
+
+      results[idx].votes.push({
+        movieId: vote.movieId,
+        votes: vote._count._all,
+        movie,
+      });
+    }
 
     res.status(200).json(results);
   } catch (error) {
