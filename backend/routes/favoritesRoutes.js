@@ -59,4 +59,28 @@ router.delete('/movie-id/:movieId', async (req, res) => {
   }
 });
 
+router.get('/list/:listId/mine', async (req, res) => {
+  const deviceId = req.get('X-STAT-deviceId');
+  const listId = req.params.listId;
+  try {
+    const favorites = await prisma.favorite.findMany({
+      where: {
+        deviceId,
+        movie: { listId },
+      },
+    });
+
+    // Just return IDs...
+    const favoriteIDs = favorites.reduce((acc, favorite) => {
+      acc.push(favorite.movieId);
+      return acc;
+    }, []);
+
+    res.status(200).json(favoriteIDs);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
 export default router
