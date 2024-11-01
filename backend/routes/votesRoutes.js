@@ -4,6 +4,10 @@ import { PrismaClient, Prisma } from '@prisma/client';
 const prisma = new PrismaClient();
 const router = express.Router();
 
+/**
+ * Post vote in active voting round.
+ * List ID attached to movie.
+ */
 router.post('/movie/:movieId/round/active', async (req, res) => {
   const movieId = req.params.movieId;
   const deviceId = req.get('X-STAT-deviceId');
@@ -48,6 +52,9 @@ router.post('/movie/:movieId/round/active', async (req, res) => {
   }
 });
 
+/**
+ * Get user's votes for list ID.
+ */
 router.get('/list/:listId/mine', async (req, res) => {
   const deviceId = req.get('X-STAT-deviceId');
   const listId = req.params.listId;
@@ -67,6 +74,9 @@ router.get('/list/:listId/mine', async (req, res) => {
   }
 });
 
+/**
+ * Get voting results for list ID.
+ */
 router.get('/list/:listId/results', async (req, res) => {
   /**
    * Raw query is more efficient:
@@ -78,7 +88,7 @@ router.get('/list/:listId/results', async (req, res) => {
    */
   const listId = req.params.listId;
   try {
-    // Get vote counts, rounds, and movieIds, then pull watched info. 
+    // Get vote counts, rounds, and movieIds, then pull movie info. 
     // Prisma doesn't appear to be able to combine these to a single query.
     const votes = await prisma.vote.groupBy({
       by: ['round', 'movieId'],
