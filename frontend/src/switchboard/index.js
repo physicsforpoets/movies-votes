@@ -18,8 +18,8 @@ const getSessionId = () => {
 const fetcher = (url, options = {}) => {
   const deviceId = getSessionId();
   const optionsToSend = {
-    credentials: 'include',
     ...options,
+    credentials: 'include',
     headers: {
       ...options?.headers,
       'X-STAT-deviceId': deviceId,
