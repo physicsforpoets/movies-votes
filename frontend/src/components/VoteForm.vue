@@ -42,7 +42,7 @@ const unwatchedFavorites = computed(() => {
 
 // Event handlers
 function onMovieClick(movie) {
-  if (selectedMovies.value.indexOf(movie.id) > -1) {
+  if (selectedMovies.value.find(movieCheck => movieCheck.id === movie.id)) {
     selectedMovies.value = selectedMovies.value.filter(movieCheck => movieCheck.id !== movie.id);
   } else {
     selectedMovies.value = [movie, ...selectedMovies.value];
@@ -126,6 +126,10 @@ ul.movies-grid {
 ul.movies-grid>li {
   margin: 0;
   padding: 0;
+}
+
+.movie-card :deep(.poster-img) {
+  border-radius: 5px;
 }
 
 .movie-card.selected :deep(.poster-img) {

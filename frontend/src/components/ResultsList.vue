@@ -16,6 +16,7 @@ const { getResults } = votesStore;
 const { results, myVotes } = storeToRefs(votesStore);
 
 const listStore = useListStore();
+const { getList } = listStore;
 const { votingRound, votingActive } = storeToRefs(listStore);
 
 // Component State
@@ -27,6 +28,7 @@ const myVotesForRound = computed(() => {
 
 onMounted(async () => {
   loading.value = true;
+  await getList(listId);
   await getResults(listId);
   loading.value = false;
 });
@@ -166,5 +168,10 @@ table tr.watched td {
   float: right;
   margin: 4px auto 16px;
   width: 33%;
+}
+
+.watched-movie :deep(.poster-img),
+.my-votes :deep(.poster-img) {
+  border-radius: 3px;
 }
 </style>

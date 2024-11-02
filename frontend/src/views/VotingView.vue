@@ -41,9 +41,9 @@ onMounted(async () => {
     </div>
     <LoadingSpinner v-if="loading" class="loading-spinner" />
     <template v-else>
-      <h2 style="text-align: center" v-if="!votingActive">Voting is Not Yet Active</h2>
-      <VoteForm v-else-if="canUserVote" />
-      <ResultsList v-else />
+      <VoteForm v-if="canUserVote" />
+      <ResultsList v-else-if="!!votingRound" />
+      <h2 style="text-align: center" v-else-if="!votingActive">Voting is Not Yet Active</h2>
     </template>
   </article>
 </template>
