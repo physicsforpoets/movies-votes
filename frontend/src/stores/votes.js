@@ -1,44 +1,43 @@
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 import { 
   getMyVotes as sbGetMyVotes, 
-  addVote as sbAddVote,
-  removeVote as sbRemoveVote,
+  addVotes as sbAddVotes,
+  getResults as sbGetResults,
 } from '../switchboard';
 
 export const useVotesStore = defineStore('votes', () => {
   const myVotes = ref([]);
+  const results = ref([]);
 
-  async function getMyVotes () {
+  const myVotesForRound = computed(() => {
+    // return (round) => myVotes.value.filter(vote => vote.round === round);
+    return (round) => myVotes.value.filter(vote => vote.round === round);
+  });
+
+  async function getMyVotes (listId) {
     // TODO: Try/Catch
-    const votes = await sbGetMyVotes();
-    myVotes.value = votes.votes;
+    const votes = await sbGetMyVotes(listId);
+    myVotes.value = votes;
   }
 
-  function addVote (movieId) {
-    if (myVotes.value.indexOf(movieId) < 0) {
-      myVotes.value = [movieId, ...myVotes.value];
-      // Assume API success
-      sbAddVote(movieId);
-    } else {
-      console.warn('Movie was already in myVotes');
-    }
+  function addVotes (votes) {
+    myVotes.value = [...votes, ...myVotes.value];
+    // Assume API success
+    sbAddVotes(votes.map(vote => vote.movieId));
   }
 
-  function removeVote (movieId) {
-    if (myVotes.value.indexOf(movieId) > -1) {
-      myVotes.value = myVotes.value.filter(voteId => voteId !== movieId);
-      // Assume API success
-      sbRemoveVote(movieId);
-    } else {
-      console.warn('Movie was not in myVotes');
-    }
+  async function getResults (listId) {
+    const response = await sbGetResults(listId);
+    results.value = response;
   }
 
   return {
     myVotes,
-    addVote,
+    myVotesForRound,
+    results,
+    addVotes,
     getMyVotes,
-    removeVote,
+    getResults,
   };
 });

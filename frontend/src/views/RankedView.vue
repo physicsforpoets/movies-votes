@@ -3,7 +3,8 @@ import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useListStore } from '../stores/list';
 
-const listId = '24b7b22d-684b-491c-846a-f05d26c7faa1';
+import config from '../config.json';
+const listId = config.listId;
 
 // Page Status
 const loading = ref(true);
@@ -81,60 +82,60 @@ const watchedMovies = computed(() => {
 </template>
 
 <style scoped>
-  .ranked-view {
-    padding: 0 16px 80px;
-  }
+.ranked-view {
+  padding: 0 16px 80px;
+}
 
-  section {
-    padding: 16px 0;
-  }
+section {
+  padding: 16px 0;
+}
 
-  section h3 {
-    font-size: 24px;
-    font-weight: var(--mv-fw-semibold);
-    margin-bottom: 8px;
-  }
+section h3 {
+  font-size: 24px;
+  font-weight: var(--mv-fw-semibold);
+  margin-bottom: 8px;
+}
 
-  table {
-    border-spacing: 0;
-    font-size: 14px;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-  }
+table {
+  border-spacing: 0;
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
 
-  table,
-  table th,
-  table td {
-    margin: 0;
-    text-align: left;
-  }
+table,
+table th,
+table td {
+  margin: 0;
+  text-align: left;
+}
 
-  table th {
-    font-weight: var(--mv-fw-semibold);
-    border-bottom: 2px solid var(--mv-text-light);
-    padding: 0 6px 4px 0;
-  }
+table th {
+  font-weight: var(--mv-fw-semibold);
+  border-bottom: 2px solid var(--mv-text-light);
+  padding: 0 6px 4px 0;
+}
 
-  table td {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 6px 6px 6px 0;
-  }
+table td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 6px 6px 6px 0;
+}
 
-  table th.count,
-  table td.count {
-    text-align: center;
-    width: 15%;
-  }
+table th.count,
+table td.count {
+  text-align: center;
+  width: 15%;
+}
 
-  .view-header {
-    padding: 24px 0 16px;
-  }
+.view-header {
+  padding: 24px 0 16px;
+}
 
-  .view-header img {
-    display: block;
-    margin: 0 auto;
-    max-width: 380px;
-    width: 60%;
-  }
+.view-header img {
+  display: block;
+  margin: 0 auto;
+  max-width: 380px;
+  width: 60%;
+}
 </style>

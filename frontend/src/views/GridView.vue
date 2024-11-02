@@ -2,10 +2,12 @@
 import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useListStore } from '../stores/list';
-import { useVotesStore } from '../stores/votes';
+import { useFavoritesStore } from '../stores/favorites';
 
 import MovieDetail from '../components/MovieDetail.vue';
 import LoadingSpinner from '../components/LoadingSpinner.vue';
+
+import config from '../config.json';
 
 // Icons
 import MovieCard from '../components/MovieCard.vue';
@@ -17,7 +19,7 @@ defineProps({
   showRankings: { type: Boolean, default: false },
 });
 
-const listId = '24b7b22d-684b-491c-846a-f05d26c7faa1';
+const listId = config.listId;
 
 // Page Status
 const loading = ref(true);
@@ -27,8 +29,8 @@ const listStore = useListStore();
 const { movies } = storeToRefs(listStore);
 const { getList } = listStore;
 
-const votesStore = useVotesStore();
-const { getMyVotes } = votesStore;
+const favoritesStore = useFavoritesStore();
+const { getMyFavorites } = favoritesStore;
 
 // Sorting
 const sortBy = ref('title'); // title or release date
@@ -62,7 +64,7 @@ const setSortBy = (field) => {
  * Dynamic Sorted Movie List
  */
 const sortedMovies = computed(() => {
-  return [...movies.value].sort((a,b) => {
+  return [...movies.value].sort((a, b) => {
     const reverseOrder = sortOrder.value === 'asc' ? 1 : -1;
     if (sortBy.value === 'title') {
       return a.sortTitle.localeCompare(b.sortTitle) * reverseOrder;
@@ -76,7 +78,7 @@ const sortedMovies = computed(() => {
 onMounted(async () => {
   loading.value = true;
   await getList(listId);
-  await getMyVotes();
+  await getMyFavorites(listId);
   loading.value = false;
 });
 </script>
@@ -110,7 +112,8 @@ onMounted(async () => {
 
         <ul class="movies-grid">
           <li v-for="movie in sortedMovies" :key="movie.id">
-            <MovieCard :movie="movie" @detail-click="onMovieDetailClick(movie)" :class="{ watched: movie.watched }" />
+            <MovieCard :movie="movie" @detail-click="onMovieDetailClick(movie)"
+              :class="{ watched: !!movie.roundWatched }" />
           </li>
         </ul>
       </div>
@@ -121,115 +124,115 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-  .grid-view {
-    padding-bottom: 80px;
-    position: relative;
-  }
+.grid-view {
+  padding-bottom: 80px;
+  position: relative;
+}
 
-  .grid-wrapper {
-    padding: 0 16px;
-    position: relative;
-  }
+.grid-wrapper {
+  padding: 0 16px;
+  position: relative;
+}
 
-  ul.movies-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    grid-gap: 1.25rem 1rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
+ul.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-gap: 1.25rem 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
 
-  ul.movies-grid > li {
-    margin: 0;
-    padding: 0;
-  }
+ul.movies-grid>li {
+  margin: 0;
+  padding: 0;
+}
 
-  /* TODO: Move watched styles into MovieCard, use prop or movie.watched */
+/* TODO: Move watched styles into MovieCard, use prop or movie.watched */
 
-  .movie-card {
-    transition: opacity 300ms;
-  }
+.movie-card {
+  transition: opacity 300ms;
+}
 
-  .movie-card.watched {
-    opacity: 0.35;
-  }
+.movie-card.watched {
+  opacity: 0.35;
+}
 
-  .grid-header {
-    display: flex;
-    justify-content: flex-end;
-  }
+.grid-header {
+  display: flex;
+  justify-content: flex-end;
+}
 
-  .grid-controls {
-    align-items: center;
-    display: flex;
-    gap: 8px;
-    padding-bottom: 16px;
-  }
+.grid-controls {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  padding-bottom: 16px;
+}
 
-  .grid-controls .label {
-    color: white;
-    font-size: 16px;
-    font-weight: var(--mv-fw-semibold);
-    text-transform: uppercase;
-  }
+.grid-controls .label {
+  color: white;
+  font-size: 16px;
+  font-weight: var(--mv-fw-semibold);
+  text-transform: uppercase;
+}
 
-  .grid-controls button {
-    appearance: none;
-    align-items: center;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    border-radius: 3px;
-    display: flex;
-    padding: 2px;
-  }
+.grid-controls button {
+  appearance: none;
+  align-items: center;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 3px;
+  display: flex;
+  padding: 2px;
+}
 
-  .grid-controls button.active {
-    border-bottom: 2px solid white;
-  }
+.grid-controls button.active {
+  border-bottom: 2px solid white;
+}
 
-  .grid-controls .sort-icon {
-    height: 24px;
-    width: 24px;
-  }
+.grid-controls .sort-icon {
+  height: 24px;
+  width: 24px;
+}
 
-  .grid-controls .carat {
-    height: 10px;
-    width: 10px;
-  }
+.grid-controls .carat {
+  height: 10px;
+  width: 10px;
+}
 
-  .grid-controls .carat.asc {
-    transform: scaleY(-1);
-  }
+.grid-controls .carat.asc {
+  transform: scaleY(-1);
+}
 
-  .hero-bg {
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: 100%;
-  }
+.hero-bg {
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
 
-  .app-hero {
-    display: flex;
-    height: 130vw;
-    align-items: flex-end;
-    padding-bottom: 24px;
-    position: relative;
-  }
+.app-hero {
+  display: flex;
+  height: 130vw;
+  align-items: flex-end;
+  padding-bottom: 24px;
+  position: relative;
+}
 
-  .app-hero img {
-    display: block;
-    margin: 0 auto;
-    max-width: 380px;
-    width: 80%;
-  }
+.app-hero img {
+  display: block;
+  margin: 0 auto;
+  max-width: 380px;
+  width: 80%;
+}
 
-  .loading-spinner {
-    left: 50%;
-    opacity: 0.75;
-    position: fixed;
-    top: 50%;
-    transform: translate(-50%,-50%);
-  }
+.loading-spinner {
+  left: 50%;
+  opacity: 0.75;
+  position: fixed;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
 </style>

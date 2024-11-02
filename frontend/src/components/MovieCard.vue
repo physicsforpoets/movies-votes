@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useVotesStore } from '../stores/votes';
+import { useFavoritesStore } from '../stores/favorites';
 import { useListStore } from '../stores/list';
 
 import HeartOff from '../components/icons/HeartOff.vue';
@@ -19,20 +19,21 @@ const RATINGS = {
 
 const props = defineProps({
   movie: { type: Object, required: true },
+  hideDetails: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['detailClick']);
 
-// Assume 'getMyVotes' called by parent/app
-const votesStore = useVotesStore();
-const { myVotes } = storeToRefs(votesStore);
-const { addVote, removeVote } = votesStore;
+// Assume 'getMyFavorites' called by parent/app
+const favoritesStore = useFavoritesStore();
+const { myFavoriteIDs } = storeToRefs(favoritesStore);
+const { addFavorite, removeFavorite } = favoritesStore;
 
 const listStore = useListStore();
 const { setWatched } = listStore;
 
-const hasVote = computed(() => {
-  return myVotes.value.indexOf(props.movie.id) > -1;
+const isInFavorites = computed(() => {
+  return myFavoriteIDs.value.indexOf(props.movie.id) > -1;
 });
 
 const releaseYear = computed(() => {
@@ -40,15 +41,15 @@ const releaseYear = computed(() => {
   return d.getFullYear();
 });
 
-const onVoteClick = () => {
+const onFavoriteClick = () => {
   if (props.movie.watched) {
     return;
   }
 
-  if (hasVote.value) {
-    removeVote(props.movie.id);
+  if (isInFavorites.value) {
+    removeFavorite(props.movie.id);
   } else {
-    addVote(props.movie.id);
+    addFavorite(props.movie);
   }
 };
 
@@ -64,23 +65,22 @@ const onWatchedClick = () => {
 <template>
   <div class="movie-card">
     <div class="poster-wrapper" @click="emit('detailClick')">
-      <img 
-        v-if="movie.securePosterUrl"
-        class="poster-img"
-        :src="movie.securePosterUrl"
-        alt=""
-      />
+      <img v-if="movie.securePosterUrl" class="poster-img" :src="movie.securePosterUrl" alt="" />
       <div v-else class="poster-text">{{ movie.name }}</div>
-      <SkullBanner v-if="movie.scary" class="scary-skull" />
+      <SkullBanner v-if="movie.scary && !hideDetails" class="scary-skull" />
     </div>
-    <div class="details">
+    <div class="details" v-if="!hideDetails">
       <div class="meta">
         <span class="release-year">{{ releaseYear }}</span>
         <span class="rating">{{ RATINGS[movie.rating] }}</span>
       </div>
       <div class="actions">
-        <button v-if="hasVote" @click="onVoteClick"><HeartOn /></button>
-        <button v-else @click="onVoteClick"><HeartOff /></button>
+        <button v-if="isInFavorites" @click="onFavoriteClick">
+          <HeartOn />
+        </button>
+        <button v-else @click="onFavoriteClick">
+          <HeartOff />
+        </button>
       </div>
     </div>
     <div class="watched-wrapper" v-if="false">
@@ -91,83 +91,84 @@ const onWatchedClick = () => {
 </template>
 
 <style scoped>
-  .movie-card {
-    position: relative;  
-  }
+.movie-card {
+  position: relative;
+}
 
-  .poster-wrapper {
-    aspect-ratio: 2 / 3;
-    background: #333;
-    border-radius: 3px;
-    box-shadow: 0 0 12px rgba(0,0,0,1);
-    position: relative;
-    width: 100%;
-  }
+.poster-wrapper {
+  aspect-ratio: 2 / 3;
+  background: #333;
+  border-radius: 3px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 1);
+  position: relative;
+  width: 100%;
+}
 
-  .poster-img {
-    border-radius: 5px 5px 0 0;
-    display: block;
-    height: 100%;
-    margin: 0;
-    object-fit: cover;
-    object-position: center center;
-    width: 100%;
-  }
+.poster-img {
+  border-radius: 5px 5px 0 0;
+  display: block;
+  height: 100%;
+  margin: 0;
+  object-fit: cover;
+  object-position: center center;
+  width: 100%;
+}
 
-  .poster-wrapper::after {
-    border-radius: 3px;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
-    content: "";
-    height: 100%;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: 100%;
-  }
+.poster-wrapper::after {
+  border-radius: 3px;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  content: "";
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
 
-  .scary-skull {
-    height: 40px;
-    position: absolute;
-    right: 2px;
-    top: 0;
-    width: 40px;
-  }
+.scary-skull {
+  height: 40px;
+  position: absolute;
+  right: 2px;
+  top: 0;
+  width: 40px;
+}
 
-  .details {
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 2px;
-    position: relative;
-  }
+.details {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 2px;
+  position: relative;
+}
 
-  .meta {
-    font-family: var(--mv-ff-serif);
-    font-size: 15px;
-    line-height: 1;
-  }
-  .rating {
-    border: 1px solid rgba(255, 255, 255, 0.75);
-    border-radius: 2px;
-    display: inline-block;
-    font-size: 11px;
-    font-weight: var(--mv-fw-bold);
-    margin-left: 4px;
-    line-height: 1;
-    padding: 1px 2px;
-    transform: translateY(-1px);
-  }
+.meta {
+  font-family: var(--mv-ff-serif);
+  font-size: 15px;
+  line-height: 1;
+}
 
-  .actions button {
-    appearance: none;
-    background: none;
-    border: none;
-    border-radius: 0;
-  }
+.rating {
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 2px;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: var(--mv-fw-bold);
+  margin-left: 4px;
+  line-height: 1;
+  padding: 1px 2px;
+  transform: translateY(-1px);
+}
 
-  .actions button svg {
-    display: inline-block;
-    height: 24px;
-    width: 24px;
-  }
+.actions button {
+  appearance: none;
+  background: none;
+  border: none;
+  border-radius: 0;
+}
+
+.actions button svg {
+  display: inline-block;
+  height: 24px;
+  width: 24px;
+}
 </style>

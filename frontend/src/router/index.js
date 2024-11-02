@@ -9,9 +9,9 @@ const router = createRouter({
       component: () => import('../views/GridView.vue'),
     },
     {
-      path: '/standings',
-      name: 'standings',
-      component: () => import('../views/RankedView.vue'),
+      path: '/voting',
+      name: 'voting',
+      component: () => import('../views/VotingView.vue'),
       props: {
         showRankings: true,
       },

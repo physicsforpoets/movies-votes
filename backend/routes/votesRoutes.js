@@ -14,30 +14,30 @@ router.post('/movie/:movieId/round/active', async (req, res) => {
 
   let data;
   try {
-      // Check that movie's list is active and voting is active, get active round
-      // NOTE: Raw query with subquery for round # could be more efficient than 2 queries
-      const movie = await prisma.movie.findFirstOrThrow({
-        where: {
-          id: movieId,
-          list: {
-            active: true,
-            votingActive: true,
-            votingRound: { gt: 0 },
-          },
+    // Check that movie's list is active and voting is active, get active round
+    // NOTE: Raw query with subquery for round # could be more efficient than 2 queries
+    const movie = await prisma.movie.findFirstOrThrow({
+      where: {
+        id: movieId,
+        list: {
+          active: true,
+          votingActive: true,
+          votingRound: { gt: 0 },
         },
-        include: { list: true },
-      });
+      },
+      include: { list: true },
+    });
 
-      data = {
-        deviceId,
-        movieId,
-        round: movie.list.votingRound,
-      };
+    data = {
+      deviceId,
+      movieId,
+      round: movie.list.votingRound,
+    };
 
-      // TODO: Push client notification
+    // TODO: Push client notification
 
-      const vote = await prisma.vote.create({ data });
-      res.status(200).json(vote);
+    const vote = await prisma.vote.create({ data });
+    res.status(200).json(vote);
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError
@@ -52,6 +52,52 @@ router.post('/movie/:movieId/round/active', async (req, res) => {
   }
 });
 
+router.post('/round/active', async (req, res) => {
+  const deviceId = req.get('X-STAT-deviceId');
+  const movieIds = req.body.movieIds;
+  const response = [];
+
+  for (const i in movieIds) {
+    const movieId = movieIds[i];
+    console.log('trying movieId', movieId);
+    try {
+      // Check that movie's list is active and voting is active, get active round
+      // NOTE: Raw query with subquery for round # could be more efficient than 2 queries
+      const movie = await prisma.movie.findFirstOrThrow({
+        where: {
+          id: movieId,
+          list: {
+            active: true,
+            votingActive: true,
+            votingRound: { gt: 0 },
+          },
+        },
+        include: { list: true },
+      });
+  
+      const data = {
+        deviceId,
+        movieId,
+        round: movie.list.votingRound,
+      };
+  
+      // TODO: Push client notification
+      response.push({ ...data, movie });
+      await prisma.vote.create({ data });
+    } catch (error) {
+      if (
+        ! error instanceof Prisma.PrismaClientKnownRequestError
+        || error.code !== 'P2002'
+      ) {
+        console.error(error);
+        res.status(400).json({ message: error.message });
+      }
+    }
+  }
+
+  res.status(200).json(response);
+})
+
 /**
  * Get user's votes for list ID.
  */
@@ -62,6 +108,35 @@ router.get('/list/:listId/mine', async (req, res) => {
     const votes = await prisma.vote.findMany({
       where: { 
         deviceId,
+        movie: { listId },
+      },
+      orderBy: { round: 'desc' },
+      include: { movie: true },
+    });
+    res.status(200).json(votes);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
+/**
+ * Get user's votes for list ID.
+ */
+router.get('/list/:listId/mine/active-round', async (req, res) => {
+  const deviceId = req.get('X-STAT-deviceId');
+  const listId = req.params.listId;
+  try {
+    const list = await prisma.list.findFirstOrThrow({ id: listId });
+    if (!list.votingActive) {
+      // if voting not active, just return an empty array
+      return res.status(200).json([]);
+    }
+
+    const votes = await prisma.vote.findMany({
+      where: { 
+        deviceId,
+        round: list.votingRound,
         movie: { listId },
       },
       orderBy: { round: 'desc' },
@@ -133,7 +208,7 @@ router.get('/list/:listId/results', async (req, res) => {
       return acc;
     }, {});
 
-    const results = [];
+    let results = [];
     for (const i in votes) {
       const vote = votes[i];
       const idx = vote.round - 1;
@@ -143,7 +218,7 @@ router.get('/list/:listId/results', async (req, res) => {
         results[idx] = {
           round: vote.round,
           watchedMovieId: null,
-          watchedMovie: {},
+          watchedMovie: null,
           votes: [],
         };
       }
@@ -159,6 +234,10 @@ router.get('/list/:listId/results', async (req, res) => {
         movie,
       });
     }
+
+    results = results.sort((a, b) => {
+      return a.round < b.round ? 1 : -1;
+    });
 
     res.status(200).json(results);
   } catch (error) {

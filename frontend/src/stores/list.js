@@ -6,8 +6,10 @@ import {
  } from '../switchboard';
 
 export const useListStore = defineStore('list', () => {
-const name = ref('');
+  const name = ref('');
   const movies = ref([]);
+  const votingActive = ref(false);
+  const votingRound = ref();
 
   async function getList (id) {
     // TODO: Try/Catch
@@ -15,6 +17,8 @@ const name = ref('');
     const list = await sbGetList(id);
     name.value = list.name;
     movies.value = list.movies;
+    votingActive.value = list.votingActive;
+    votingRound.value = list.votingRound;
   }
 
   function setWatched (movieId, watched = true) {
@@ -36,6 +40,8 @@ const name = ref('');
   return {
     name,
     movies,
+    votingActive,
+    votingRound,
     getList,
     setWatched,
   };

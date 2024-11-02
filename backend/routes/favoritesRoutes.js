@@ -26,6 +26,7 @@ router.post('/', async (req, res) => {
 
   try {
     const favorite = await prisma.favorite.create({ data });
+    // NOTE: Should this return all favorites every POST?
     res.status(200).json(favorite);
   } catch (error) {
     if (
@@ -68,6 +69,9 @@ router.get('/list/:listId/mine', async (req, res) => {
         deviceId,
         movie: { listId },
       },
+      include: {
+        movie: true,
+      }
     });
 
     // Just return IDs...
@@ -76,7 +80,7 @@ router.get('/list/:listId/mine', async (req, res) => {
       return acc;
     }, []);
 
-    res.status(200).json(favoriteIDs);
+    res.status(200).json(favorites.map(movie => movie.movie));
   } catch (error) {
     console.error(error);
     res.status(400).json({ message: error.message });
