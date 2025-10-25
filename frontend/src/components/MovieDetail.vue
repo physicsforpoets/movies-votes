@@ -195,6 +195,7 @@ onMounted(async () => {
   overflow-x: hidden;
   overflow-y: auto;
   padding: 16px 16px 80px;
+  z-index: 1500;
 }
 
 .protection {

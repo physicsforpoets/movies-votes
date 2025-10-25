@@ -1,16 +1,12 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useListStore } from '../stores/list';
-import { useFavoritesStore } from '../stores/favorites';
 
 import MovieDetail from '../components/MovieDetail.vue';
-import LoadingSpinner from '../components/LoadingSpinner.vue';
 
 import appHeroUrl from '@/assets/img/app-hero.png';
 import appTitleUrl from '@/assets/img/app-title.png';
-
-import config from '../config.json';
 
 // Icons
 import MovieCard from '../components/MovieCard.vue';
@@ -22,18 +18,9 @@ defineProps({
   showRankings: { type: Boolean, default: false },
 });
 
-const listId = config.listId;
-
-// Page Status
-const loading = ref(true);
-
 // Store mapping
 const listStore = useListStore();
 const { movies } = storeToRefs(listStore);
-const { getList } = listStore;
-
-const favoritesStore = useFavoritesStore();
-const { getMyFavorites } = favoritesStore;
 
 // Sorting
 const sortBy = ref('title'); // title or release date
@@ -97,18 +84,7 @@ const sortedMovies = computed(() => {
   });
 });
 
-onMounted(async () => {
-  loading.value = true;
-  await getList(listId);
-  await getMyFavorites(listId);
 
-  // setTimeout(() => {
-  //   console.log('opening movie');
-  //   onMovieDetailClick(movies.value[0]);
-  // }, 5000);
-
-  loading.value = false;
-});
 </script>
 
 <template>
@@ -117,39 +93,37 @@ onMounted(async () => {
     <div class="app-hero">
       <img :src="appTitleUrl" alt="" />
     </div>
-    <LoadingSpinner v-if="loading" class="loading-spinner" />
-    <template v-else>
-      <div class="grid-wrapper">
-        <div class="grid-header">
-          <div class="grid-controls">
-            <div class="label">Sort By</div>
-            <button @click="setSortBy('title')" :class="{ active: sortBy === 'title' }">
-              <TextSort class="sort-icon" />
-              <template v-if="sortBy === 'title'">
-                <DownArrow class="carat" :class="{ desc: sortOrder === 'desc', asc: sortOrder === 'asc'  }" />
-              </template>
-            </button>
-            <button @click="setSortBy('date')" :class="{ active: sortBy === 'date' }">
-              <DateSort class="sort-icon" />
-              <template v-if="sortBy === 'date'">
-                <DownArrow class="carat" :class="{ desc: sortOrder === 'desc', asc: sortOrder === 'asc'  }" />
-              </template>
-            </button>
-          </div>
-        </div>
 
-        <ul class="movies-grid">
-          <li v-for="movie in sortedMovies" :key="movie.id">
-            <MovieCard :movie="movie" @detail-click="onMovieDetailClick(movie)"
-              :class="{ watched: !!movie.roundWatched }" />
-          </li>
-        </ul>
+    <div class="grid-wrapper">
+      <div class="grid-header">
+        <div class="grid-controls">
+          <div class="label">Sort By</div>
+          <button @click="setSortBy('title')" :class="{ active: sortBy === 'title' }">
+            <TextSort class="sort-icon" />
+            <template v-if="sortBy === 'title'">
+              <DownArrow class="carat" :class="{ desc: sortOrder === 'desc', asc: sortOrder === 'asc'  }" />
+            </template>
+          </button>
+          <button @click="setSortBy('date')" :class="{ active: sortBy === 'date' }">
+            <DateSort class="sort-icon" />
+            <template v-if="sortBy === 'date'">
+              <DownArrow class="carat" :class="{ desc: sortOrder === 'desc', asc: sortOrder === 'asc'  }" />
+            </template>
+          </button>
+        </div>
       </div>
 
-      <Transition name="movie-detail">
-        <MovieDetail v-if="movieDetail" :movie="movieDetail" @close="oonMovieDetailClose" />
-      </Transition>
-    </template>
+      <ul class="movies-grid">
+        <li v-for="movie in sortedMovies" :key="movie.id">
+          <MovieCard :movie="movie" @detail-click="onMovieDetailClick(movie)"
+            :class="{ watched: !!movie.roundWatched }" />
+        </li>
+      </ul>
+    </div>
+
+    <Transition name="movie-detail">
+      <MovieDetail v-if="movieDetail" :movie="movieDetail" @close="oonMovieDetailClose" />
+    </Transition>
   </article>
 </template>
 

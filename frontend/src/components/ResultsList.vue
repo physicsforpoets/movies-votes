@@ -15,8 +15,8 @@ const votesStore = useVotesStore();
 const { getResults } = votesStore;
 const { results, myVotes } = storeToRefs(votesStore);
 
+// getList is called by parent
 const listStore = useListStore();
-const { getList } = listStore;
 const { votingRound, votingActive } = storeToRefs(listStore);
 
 // Component State
@@ -28,7 +28,6 @@ const myVotesForRound = computed(() => {
 
 onMounted(async () => {
   loading.value = true;
-  await getList(listId);
   await getResults(listId);
   loading.value = false;
 });
