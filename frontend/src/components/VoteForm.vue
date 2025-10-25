@@ -102,7 +102,7 @@ h2 {
 }
 
 .grid-wrapper {
-  padding: 0 16px;
+  padding: 0 24px;
   position: relative;
 }
 
@@ -140,16 +140,16 @@ ul.movies-grid>li {
 .btn-submit {
   appearance: none;
   border: none;
-  border-radius: 8px;
-  bottom: 90px;
+  border-radius: 16px;
+  bottom: 96px;
   box-shadow: none;
   font-size: 1.5em;
   font-weight: bold;
-  margin: 0 16px;
+  margin: 0 24px;
   left: 0;
   padding: 16px;
   position: fixed;
-  width: calc(100% - 32px);
+  width: calc(100% - 48px);
 }
 
 .btn-submit:not(:disabled) {

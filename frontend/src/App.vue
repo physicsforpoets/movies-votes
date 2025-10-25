@@ -38,6 +38,7 @@ import AppInitializer from './components/AppInitializer.vue';
 .app-nav {
   bottom: 0;
   left: 0;
+  padding: 0 24px calc(env(safe-area-inset-bottom) + 24px);
   position: fixed;
   width: 100%;
   z-index: 800;
@@ -70,11 +71,13 @@ import AppInitializer from './components/AppInitializer.vue';
   align-items: flex-start;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
+  border-radius: 16px;
   color: white;
   display: flex;
   justify-content: space-around;
   list-style: none;
   margin: 0;
+  overflow: hidden;
   padding: 16px 0 calc(env(safe-area-inset-bottom) + 16px);
 }
 
