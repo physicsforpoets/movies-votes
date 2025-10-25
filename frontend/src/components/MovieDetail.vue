@@ -1,8 +1,8 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useFavoritesStore } from '../stores/favorites';
 
-import { useVotesStore } from '../stores/votes';
 import { useListStore } from '../stores/list';
 import { lookupMovie } from '../switchboard';
 
@@ -28,12 +28,10 @@ const props = defineProps({
 });
 const emit = defineEmits(['close']);
 
-// Store bindings
-
-// Assume 'getMyVotes' called by parent/app
-const votesStore = useVotesStore();
-const { myVotes } = storeToRefs(votesStore);
-const { addVote, removeVote } = votesStore;
+// Assume 'getMyFavorites' called by parent/app
+const favoritesStore = useFavoritesStore();
+const { myFavoriteIDs } = storeToRefs(favoritesStore);
+const { addFavorite, removeFavorite } = favoritesStore;
 
 const listStore = useListStore();
 const { setWatched } = listStore;
@@ -43,6 +41,9 @@ const isReady = ref(false);
 const lookupData = ref(null);
 
 // Computeds
+const isInFavorites = computed(() => {
+  return myFavoriteIDs.value.indexOf(props.movie.id) > -1;
+});
 
 const formattedReleaseDate = computed(() => {
   if (!props.movie.releaseDate) {
@@ -59,19 +60,15 @@ const formattedRuntime = computed(() => {
   if (!lookupData.value.runtime) {
     return '';
   }
-  
+
   const totalMins = lookupData.value.runtime;
   const hours = Math.floor(totalMins / 60);
   const minutes = totalMins % 60;
   return `${hours} hr ${minutes} min`;
 });
 
-const hasVote = computed(() => {
-  return myVotes.value.indexOf(props.movie.id) > -1;
-});
-
 const trailers = computed(() => {
-  return lookupData.value.videos?.results .filter(video => video.site === 'YouTube' && video.type === 'Trailer') || null;
+  return lookupData.value.videos?.results.filter(video => video.site === 'YouTube' && video.type === 'Trailer') || null;
 });
 
 const reviews = computed(() => {
@@ -88,11 +85,11 @@ const reviews = computed(() => {
 
 // Methods
 
-const onVoteClick = () => {
-  if (hasVote.value) {
-    removeVote(props.movie.id);
+const onFavoriteClick = () => {
+  if (isInFavorites.value) {
+    removeFavorite(props.movie.id);
   } else {
-    addVote(props.movie.id);
+    addFavorite(props.movie);
   }
 };
 
@@ -145,11 +142,17 @@ onBeforeUnmount(() => {
             </ul>
           </div>
         </div>
-        <button class="btn-close" @click="emit('close')"><CloseIcon /></button>
+        <button class="btn-close" @click="emit('close')">
+          <CloseIcon />
+        </button>
         <ul class="actions">
-          <li class="vote">
-            <button v-if="hasVote" @click="onVoteClick"><HeartOn /></button>
-            <button v-else @click="onVoteClick"><HeartOff /></button>
+          <li class="favorite">
+            <button v-if="isInFavorites" @click="onFavoriteClick">
+              <HeartOn />
+            </button>
+            <button v-else @click="onFavoriteClick">
+              <HeartOff />
+            </button>
           </li>
         </ul>
       </div>
@@ -164,17 +167,18 @@ onBeforeUnmount(() => {
               </li>
             </ul>
           </div>
-          <button v-if="movie.watched" class="mark-watched" @click="onWatchedClick"><EyeOn /> Mark Unwatched</button>
-          <button v-else class="mark-watched" @click="onWatchedClick"><EyeOff /> Mark Watched</button>
+          <button v-if="movie.watched" class="mark-watched" @click="onWatchedClick">
+            <EyeOn /> Mark Unwatched
+          </button>
+          <button v-else class="mark-watched" @click="onWatchedClick">
+            <EyeOff /> Mark Watched
+          </button>
         </div>
       </section>
       <section v-if="trailers && trailers.length" class="trailers">
         <h3>Trailers</h3>
-        <iframe 
-          v-for="trailer in trailers"
-          :key="trailer.key"
-          :src="`https://www.youtube.com/embed/${trailer.key}`"
-        ></iframe>
+        <iframe v-for="trailer in trailers" :key="trailer.key"
+          :src="`https://www.youtube.com/embed/${trailer.key}`"></iframe>
       </section>
       <section v-if="reviews && reviews.length" class="reviews">
         <h3>Reviews</h3>
@@ -192,285 +196,285 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-  .movie-detail,
-  .protection {
-    height: 100vh;
-    left: 0;
-    position: fixed;
-    top: 0;
-    width: 100%;
-  }
+.movie-detail,
+.protection {
+  height: 100vh;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
 
-  .movie-detail {
-    overflow-x: hidden;
-    overflow-y: auto;
-    padding: 16px 16px 80px;
-  }
+.movie-detail {
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 16px 16px 80px;
+}
 
-  .protection {
-    backdrop-filter: blur(10px);
-    background: rgba(0, 0, 0, 0.5);
-  }
+.protection {
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.5);
+}
 
-  .loading-spinner {
-    left: 50%;
-    opacity: 0.75;
-    position: fixed;
-    top: 50%;
-    transform: translate(-50%,-50%);
-  }
+.loading-spinner {
+  left: 50%;
+  opacity: 0.75;
+  position: fixed;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
 
-  .modal {
-    background: #191919;
-    border-radius: 10px;
-    padding: 0 0 8px;
-    position: relative;
-  }
+.modal {
+  background: #191919;
+  border-radius: 10px;
+  padding: 0 0 8px;
+  position: relative;
+}
 
-  .hero,
-  img.backdrop {
-    aspect-ratio: 1280 / 720;
-    border-radius: 10px 10px 0 0;
-    margin: 0;
-    display: block;
-  }
+.hero,
+img.backdrop {
+  aspect-ratio: 1280 / 720;
+  border-radius: 10px 10px 0 0;
+  margin: 0;
+  display: block;
+}
 
-  .hero {
-    background: #333;
-    position: relative;
-  }
+.hero {
+  background: #333;
+  position: relative;
+}
 
-  img.backdrop {
-    left: 0;
-    object-fit: contain;
-    object-position: center center;
-    position: absolute;
-    top: 0;
-    width: 100%;
-  }
+img.backdrop {
+  left: 0;
+  object-fit: contain;
+  object-position: center center;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
 
-  .btn-close {
-    appearance: none;
-    background: none;
-    border: none;
-    border-radius: 0;
-    display: block;
-    height: 28px;
-    left: 12px;
-    padding: 0;
-    position: absolute;
-    top: 12px;
-    width: 28px;
-  }
+.btn-close {
+  appearance: none;
+  background: none;
+  border: none;
+  border-radius: 0;
+  display: block;
+  height: 28px;
+  left: 12px;
+  padding: 0;
+  position: absolute;
+  top: 12px;
+  width: 28px;
+}
 
-  .btn-close svg {
-    display: block;
-    height: 100%;
-    width: 100%;
-  }
+.btn-close svg {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
 
-  .details-container {
-    display: flex;
-    height: 100%;
-    flex-direction: column;
-    justify-content: flex-end;
-    position: relative;
-    width: 100%;
-  }
+.details-container {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+  width: 100%;
+}
 
-  .details {
-    background: linear-gradient(0deg, rgba(40,40,40,1) 0%, rgba(40,40,40,0) 100%);
-    color: white;
-    padding: 14px 14px 0;
-    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.4);
-  }
+.details {
+  background: linear-gradient(0deg, rgba(40, 40, 40, 1) 0%, rgba(40, 40, 40, 0) 100%);
+  color: white;
+  padding: 14px 14px 0;
+  text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.4);
+}
 
-  .title {
-    font-size: 28px;
-    font-weight: var(--mv-fw-semibold);
-    line-height: 1.1;
-  }
+.title {
+  font-size: 28px;
+  font-weight: var(--mv-fw-semibold);
+  line-height: 1.1;
+}
 
-  .title .scary-skull {
-    height: 24px;
-    width: 24px;
-    transform: translateY(-3px);
-  }
+.title .scary-skull {
+  height: 24px;
+  width: 24px;
+  transform: translateY(-3px);
+}
 
-  .meta {
-    color: white;
-    display: flex;
-    font-family: var(--mv-ff-serif);
-    font-size: 15px;
-    gap: 8px;
-    line-height: 1;
-    list-style: none;
-    margin: 4px 0 0;
-    padding: 0;
-  }
+.meta {
+  color: white;
+  display: flex;
+  font-family: var(--mv-ff-serif);
+  font-size: 15px;
+  gap: 8px;
+  line-height: 1;
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
 
-  .meta > li {
-    margin: 0;
-    padding: 0;
-  }
+.meta>li {
+  margin: 0;
+  padding: 0;
+}
 
-  .rating {
-    border: 1px solid rgba(255, 255, 255, 0.75);
-    border-radius: 2px;
-    display: inline-block;
-    font-size: 11px;
-    font-weight: var(--mv-fw-bold);
-    line-height: 1;
-    padding: 1px 2px;
-    transform: translateY(-1px);
-  }
+.rating {
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 2px;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: var(--mv-fw-bold);
+  line-height: 1;
+  padding: 1px 2px;
+  transform: translateY(-1px);
+}
 
-  section {
-    padding: 8px 14px;
-  }
+section {
+  padding: 8px 14px;
+}
 
-  section.description {
-    background: #282828;
-    padding-top: 0;
-    font-size: 12px;
-    text-wrap: balance;
-  }
+section.description {
+  background: #282828;
+  padding-top: 0;
+  font-size: 12px;
+  text-wrap: balance;
+}
 
-  section.description p {
-    padding-top: 12px;
-  }
+section.description p {
+  padding-top: 12px;
+}
 
-  .actions {
-    align-items: center;
-    background: rgb(0, 0, 0, 0.75);
-    border-radius: 5px;
-    display: flex;
-    gap: 8px;
-    list-style: none;
-    padding: 4px 8px;
-    position: absolute;
-    right: 12px;
-    top: 12px;
-  }
+.actions {
+  align-items: center;
+  background: rgb(0, 0, 0, 0.75);
+  border-radius: 5px;
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  padding: 4px 8px;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+}
 
-  .actions > li {
-    margin: 0;
-    padding: 0;
-  }
+.actions>li {
+  margin: 0;
+  padding: 0;
+}
 
-  .actions button {
-    appearance: none;
-    background: none;
-    border: none;
-    border-radius: 0;
-    padding: 0;
-  }
+.actions button {
+  appearance: none;
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
 
-  .actions svg {
-    height: 28px;
-    width: 28px;
-  }
+.actions svg {
+  height: 28px;
+  width: 28px;
+}
 
-  .actions .vote svg {
-    height: 22px;
-    width: 22px;
-  }
+.actions .favorite svg {
+  height: 22px;
+  width: 22px;
+}
 
-  button.mark-watched {
-    align-items: center;
-    appearance: none;
-    background: none;
-    border: none;
-    border-radius: 0;
-    color: inherit;
-    display: flex;
-    font-family: var(--mv-ff-sans-serif);
-    font-size: inherit;
-    font-weight: var(--mv-fw-semibold);
-    gap: 8px;
-    line-height: 1;
-    padding: 0;
-  }
+button.mark-watched {
+  align-items: center;
+  appearance: none;
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  display: flex;
+  font-family: var(--mv-ff-sans-serif);
+  font-size: inherit;
+  font-weight: var(--mv-fw-semibold);
+  gap: 8px;
+  line-height: 1;
+  padding: 0;
+}
 
-  button.mark-watched svg {
-    height: 16px;
-    width: 16px;
-  }
+button.mark-watched svg {
+  height: 16px;
+  width: 16px;
+}
 
-  .watch {
-    align-items: flex-end;
-    display: flex;
-    justify-content: space-between;
-    margin-top: 16px;
-    padding-bottom: 8px;
-  }
+.watch {
+  align-items: flex-end;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-bottom: 8px;
+}
 
-  .service-list {
-    display: flex;
-    gap: 6px;
-    list-style: none;
-    margin: 0;
-    padding: 2px 0 0;
-  }
+.service-list {
+  display: flex;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 2px 0 0;
+}
 
-  .service-list > li {
-    margin: 0;
-    padding: 0;
-  }
+.service-list>li {
+  margin: 0;
+  padding: 0;
+}
 
-  .service-list img {
-    display: block;
-    height: 24px;
-    margin: 0;
-    width: 24px;
-  }
+.service-list img {
+  display: block;
+  height: 24px;
+  margin: 0;
+  width: 24px;
+}
 
-  section h3 {
-    font-size: 24px;
-    font-weight: var(--mv-fw-semibold);
-    margin-bottom: 8px;
-  }
+section h3 {
+  font-size: 24px;
+  font-weight: var(--mv-fw-semibold);
+  margin-bottom: 8px;
+}
 
-  section.trailers {
-    background: #191919;
-  }
+section.trailers {
+  background: #191919;
+}
 
-  section.trailers iframe {
-    aspect-ratio: 16 / 9;
-    border: 0;
-    margin-bottom: 16px;
-    width: 100%;
-  }
+section.trailers iframe {
+  aspect-ratio: 16 / 9;
+  border: 0;
+  margin-bottom: 16px;
+  width: 100%;
+}
 
-  .review-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
+.review-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
 
-  .review-list > li {
-    margin: 0 0 16px;
-    padding: 0;
-  }
+.review-list>li {
+  margin: 0 0 16px;
+  padding: 0;
+}
 
-  .review-list a {
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 5px;
-    color: var(--mv-grey-medium);
-    display: block;
-    font-size: 12px;
-    padding: 14px 16px;
-    text-decoration: none;
-  }
+.review-list a {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 5px;
+  color: var(--mv-grey-medium);
+  display: block;
+  font-size: 12px;
+  padding: 14px 16px;
+  text-decoration: none;
+}
 
-  .review-list a p {
-    font-family: var(--mv-ff-serif);
-    font-weight: var(--mv-fw-regular);
-    font-style: italic;
-  }
+.review-list a p {
+  font-family: var(--mv-ff-serif);
+  font-weight: var(--mv-fw-regular);
+  font-style: italic;
+}
 
-  .review-list .author {
-    font-weight: var(--mv-fw-semibold);
-    margin-top: 8px;
-  }
+.review-list .author {
+  font-weight: var(--mv-fw-semibold);
+  margin-top: 8px;
+}
 </style>
