@@ -27,6 +27,11 @@ import ListIcon from './components/icons/ListIcon.vue';
 </template>
 
 <style scoped>
+.app {
+  height: 100%;
+  min-height: 100vh;
+}
+
 .app-nav {
   bottom: 0;
   left: 0;
@@ -59,8 +64,7 @@ import ListIcon from './components/icons/ListIcon.vue';
   justify-content: space-around;
   list-style: none;
   margin: 0;
-  padding: 16px 0 0;
-  height: 74px;
+  padding: 16px 0 calc(env(safe-area-inset-bottom) + 16px);
 }
 
 .app-nav ul>li {
