@@ -17,7 +17,7 @@ const { results, myVotes } = storeToRefs(votesStore);
 
 // getList is called by parent
 const listStore = useListStore();
-const { votingRound, votingActive } = storeToRefs(listStore);
+const { list } = storeToRefs(listStore);
 
 // Component State
 const loading = ref(true);
@@ -41,7 +41,7 @@ onMounted(async () => {
         <MovieCard v-if="resultsRound.watchedMovie" class="watched-movie" :movie="resultsRound.watchedMovie"
           hide-details />
         <h3>Round {{ resultsRound.round }}</h3>
-        <span class="voting-active" v-if="resultsRound.round === votingRound && votingActive">
+        <span class="voting-active" v-if="resultsRound.round === list.votingRound && list.votingActive">
           Still Voting
         </span>
         <table v-if="resultsRound.votes.length">

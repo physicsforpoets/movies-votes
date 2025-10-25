@@ -20,12 +20,12 @@ const { myVotesForRound } = storeToRefs(votesStore);
 
 const listStore = useListStore();
 const { getList } = listStore;
-const { votingActive, votingRound } = storeToRefs(listStore);
+const { list } = storeToRefs(listStore);
 
 // Component State
 const loading = ref(true);
 const canUserVote = computed(() => {
-  return votingActive.value && !myVotesForRound.value(votingRound.value).length;
+  return list.value.votingActive && !myVotesForRound.value(list.value.votingRound).length;
 });
 
 onMounted(async () => {
@@ -44,8 +44,8 @@ onMounted(async () => {
     <LoadingSpinner v-if="loading" class="loading-spinner" />
     <template v-else>
       <VoteForm v-if="canUserVote" />
-      <ResultsList v-else-if="!!votingRound" />
-      <h2 style="text-align: center" v-else-if="!votingActive">Voting is Not Yet Active</h2>
+      <ResultsList v-else-if="!!list.votingRound" />
+      <h2 style="text-align: center" v-else-if="!list.votingActive">Voting is Not Yet Active</h2>
     </template>
   </article>
 </template>

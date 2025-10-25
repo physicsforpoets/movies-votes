@@ -32,13 +32,21 @@ router.get('/:id', async (req, res) => {
       where: {
         id: req.params.id
       },
-      include: {
-        movies: {
-          include: { services: true },
-        },
-      },
     });
     res.status(200).json(list);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get('/:id/movies', async (req, res) => {
+  try {
+    const movies = await prisma.movie.findMany({
+      where: { listId: req.params.id },
+      include: { services: true },
+    });
+    res.status(200).json(movies);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });

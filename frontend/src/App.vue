@@ -1,32 +1,48 @@
 <script setup>
+import { ref, onMounted } from 'vue';
 import { RouterView } from 'vue-router';
+import { useListStore } from './stores/list';
 import GridIcon from './components/icons/GridIcon.vue';
 import ListIcon from './components/icons/ListIcon.vue';
-import AppInitializer from './components/AppInitializer.vue';
+import FullScreenLoader from './components/FullScreenLoader.vue';
+import config from './config.json';
+
+const listStore = useListStore();
+const isPending = ref(false);
+
+onMounted(async () => {
+  isPending.value = true;
+  await Promise.all([
+    listStore.getList(config.listId),
+    listStore.getListMovies(config.listId),
+  ]);
+  isPending.value = false;
+});
 </script>
 
 <template>
-  <AppInitializer>
-    <div class="app" id="app-container">
-      <RouterView class="app-body" />
-      <nav class="app-nav">
-        <ul>
-          <li>
-            <RouterLink class="link" :to="{ name: 'list' }">
-              <GridIcon />
-              <span>Browse</span>
-            </RouterLink>
-          </li>
-          <li>
-            <RouterLink class="link" :to="{ name: 'voting' }">
-              <ListIcon />
-              <span>Voting</span>
-            </RouterLink>
-          </li>
-        </ul>
-      </nav>
-    </div>
-  </AppInitializer>
+  <div class="app" id="app-container">
+    <RouterView class="app-body" />
+    <nav class="app-nav">
+      <ul>
+        <li>
+          <RouterLink class="link" :to="{ name: 'list' }">
+            <GridIcon />
+            <span>Browse</span>
+          </RouterLink>
+        </li>
+        <li>
+          <RouterLink class="link" :to="{ name: 'voting' }">
+            <ListIcon />
+            <span>Voting</span>
+          </RouterLink>
+        </li>
+      </ul>
+    </nav>
+    <Transition name="loader">
+      <FullScreenLoader v-if="isPending" />
+    </Transition>
+  </div>
 </template>
 
 <style scoped>
@@ -91,5 +107,15 @@ import AppInitializer from './components/AppInitializer.vue';
 .app-nav svg {
   height: 18px;
   width: 18px;
+}
+
+.loader-enter-active,
+.loader-leave-active {
+  transition: opacity 300ms ease-in-out;
+}
+
+.loader-enter-from,
+.loader-leave-to {
+  opacity: 0;
 }
 </style>

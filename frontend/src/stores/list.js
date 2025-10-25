@@ -3,22 +3,19 @@ import { defineStore } from 'pinia';
 import { 
   getList as sbGetList,
   setWatched as sbSetWatched,
+  getListMovies as sbGetListMovies,
  } from '../switchboard';
 
 export const useListStore = defineStore('list', () => {
-  const name = ref('');
+  const list = ref(null)
   const movies = ref([]);
-  const votingActive = ref(false);
-  const votingRound = ref();
 
   async function getList (id) {
-    // TODO: Try/Catch
-    // TODO: Cache data for the session
-    const list = await sbGetList(id);
-    name.value = list.name;
-    movies.value = list.movies;
-    votingActive.value = list.votingActive;
-    votingRound.value = list.votingRound;
+    list.value = await sbGetList(id);
+  }
+
+  async function getListMovies (id) {
+    movies.value = await sbGetListMovies(id);
   }
 
   function setWatched (movieId, watched = true) {
@@ -38,11 +35,10 @@ export const useListStore = defineStore('list', () => {
   }
 
   return {
-    name,
+    list,
     movies,
-    votingActive,
-    votingRound,
     getList,
+    getListMovies,
     setWatched,
   };
 });

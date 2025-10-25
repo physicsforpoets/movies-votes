@@ -31,14 +31,21 @@ const fetcher = (url, options = {}) => {
 
 // Lists
 
-const getList = async (id) => {
+export const getList = async (id) => {
   const url = `/lists/${id}`;
   const response = await fetcher(url);
   const list = await response.json();
   return list;
 };
 
-const getLists = async () => {
+export const getListMovies = async (id) => {
+  const url = `/lists/${id}/movies`;
+  const response = await fetcher(url);
+  const movies = await response.json();
+  return movies;
+};
+
+export const getLists = async () => {
   const url = `/lists`;
   const response = await fetcher(url);
   const lists = await response.json();
@@ -47,14 +54,14 @@ const getLists = async () => {
 
 // Favorites
 
-const getMyFavorites = async (listId) => {
+export const getMyFavorites = async (listId) => {
   const url = `/favorites/list/${listId}/mine`;
   const response = await fetcher(url);
   const favs = await response.json();
   return favs;
 };
 
-const addFavorite = async (movieId) => {
+export const addFavorite = async (movieId) => {
   const url = '/favorites';
   const response = await fetcher(url, {
     method: 'POST',
@@ -67,7 +74,7 @@ const addFavorite = async (movieId) => {
   return favorite;
 }
 
-const removeFavorite = async (movieId) => {
+export const removeFavorite = async (movieId) => {
   const url = `/favorites/movie-id/${movieId}`;
   const response = await fetcher(url, { method: 'DELETE' });
   const result = await response.json();
@@ -76,7 +83,7 @@ const removeFavorite = async (movieId) => {
 
 // Movie Services
 
-const getServices = async () => {
+export const getServices = async () => {
   const url = `/services`;
   const response = await fetcher(url);
   const services = await response.json();
@@ -85,14 +92,14 @@ const getServices = async () => {
 
 // Movie Lookup
 
-const searchMovie = async (query) => {
+export const searchMovie = async (query) => {
   const url = `/lookup/search/movie?query=${query}`;
   const response = await fetcher(url);
   const results = await response.json();
   return results;
 };
 
-const addMovie = async (movie) => {
+export const addMovie = async (movie) => {
   const url = `/movies`;
   const response = await fetcher(url, {
     method: 'POST',
@@ -112,14 +119,14 @@ const addMovie = async (movie) => {
 };
 
 // Voting
-const getMyVotes = async (listId) => {
+export const getMyVotes = async (listId) => {
   const url = `/votes/list/${listId}/mine`;
   const response = await fetcher(url);
   const votes = await response.json();
   return votes;
 };
 
-const addVotes = async (movieIds) => {
+export const addVotes = async (movieIds) => {
   const url = `/votes/round/active`;
   const response = await fetcher(url, { 
     method: 'POST',
@@ -132,14 +139,14 @@ const addVotes = async (movieIds) => {
   return votes;
 };
 
-const getResults = async (listId) => {
+export const getResults = async (listId) => {
   const url = `/votes/list/${listId}/results`;
   const response = await fetcher(url);
   const results = await response.json();
   return results;
 };
 
-const setWatched = async (movieId, watched = true) => {
+export const setWatched = async (movieId, watched = true) => {
   const url = `/movies/${movieId}/watched`;
   const response = await fetcher(url, {
     method: 'PUT',
@@ -152,25 +159,9 @@ const setWatched = async (movieId, watched = true) => {
   return movie;
 };
 
-const lookupMovie = async (movieId) => {
+export const lookupMovie = async (movieId) => {
   const url = `/lookup/movie/${movieId}/?append=videos,reviews`;
   const response = await fetcher(url);
   const movie = await response.json();
   return movie;
-}
-
-export {
-  addMovie,
-  addVotes,
-  getList,  
-  getLists,
-  getMyFavorites,
-  addFavorite,
-  removeFavorite,
-  getMyVotes,
-  getResults,
-  getServices,
-  lookupMovie,
-  searchMovie,
-  setWatched,
 }
