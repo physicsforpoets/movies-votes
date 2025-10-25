@@ -110,7 +110,7 @@ const onSubmit = async () => {
         <legend>Add a Movie</legend>
         <p>
           <label for="title">Title: <span aria-label="required">*</span></label>
-          <input id="title" type="text" name="title" v-model="title" required> 
+          <input id="title" type="text" name="title" v-model="title" required>
           <button type="button" @click="onSearchClick">SEARCH</button>
         </p>
         <p>
@@ -121,7 +121,7 @@ const onSubmit = async () => {
         <template v-else-if="searchResults">
           <ul>
             <li v-for="result in searchResults.results" :key="`result-${result.id}`">
-              {{ result.title }} - {{ result.release_date }} 
+              {{ result.title }} - {{ result.release_date }}
               <button type="button" @click="onResultClick(result)">This One</button>
             </li>
           </ul>
@@ -134,7 +134,7 @@ const onSubmit = async () => {
         <p>
           <label for="securePosterUrl">Secure Poster URL:</label>
           <input id="securePosterUrl" type="text" name="securePosterUrl" v-model="securePosterUrl">
-        </p>        
+        </p>
         <p>
           <label for="trailerUrl">Trailer URL:</label>
           <input id="trailerUrl" type="text" name="trailerUrl" v-model="trailerUrl">
@@ -160,14 +160,15 @@ const onSubmit = async () => {
         </p>
         <p>
           <label>Services:</label>
-          <ul>
-            <li v-for="service in servicesList" :key="service.id">
-              <label :for="`service-${service.id}`">
-                <input type="checkbox" :id="`service-${service.id}`" :name="`service-${service.id}`" :value="service.id" v-model="services"> 
-                {{ service.name }}
-              </label>
-            </li>
-          </ul>
+        <ul>
+          <li v-for="service in servicesList" :key="service.id">
+            <label :for="`service-${service.id}`">
+              <input type="checkbox" :id="`service-${service.id}`" :name="`service-${service.id}`" :value="service.id"
+                v-model="services">
+              {{ service.name }}
+            </label>
+          </li>
+        </ul>
         </p>
         <p>
           <label for="listId">Add to List:</label>
@@ -184,4 +185,11 @@ const onSubmit = async () => {
 </template>
 
 <style scoped>
+.movie-add-view {
+  padding: 16px;
+}
+
+p {
+  margin: .5em 0;
+}
 </style>

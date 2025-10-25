@@ -162,6 +162,42 @@ export const setWatched = async (movieId, watched = true) => {
 export const lookupMovie = async (movieId) => {
   const url = `/lookup/movie/${movieId}/?append=videos,reviews`;
   const response = await fetcher(url);
-  const movie = await response.json();
-  return movie;
+
+  if (response.ok) {
+    const result = await response.json();
+    return result;
+  } else {
+    const error = await response.json();
+    throw error;
+  }
 }
+
+export const startNextVotingRound = async (listId) => {
+  const url = `/lists/${listId}/voting/start-next-round`;
+  const response = await fetcher(url, {
+    method: 'PUT',
+  });
+
+  if (response.ok) {
+    const result = await response.json();
+    return result;
+  } else {
+    const error = await response.json();
+    throw error;
+  }
+};
+
+export const pickWinner = async (listId) => {
+  const url = `/lists/${listId}/voting/pick-winner`;
+  const response = await fetcher(url, {
+    method: 'PUT',
+  });
+
+  if (response.ok) {
+    const result = await response.json();
+    return result;
+  } else {
+    const error = await response.json();
+    throw error;
+  }
+};

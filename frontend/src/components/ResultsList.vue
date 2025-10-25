@@ -137,7 +137,7 @@ table td.count {
 }
 
 table tr.watched td {
-  color: red;
+  color: #FF7518;
   font-weight: bold;
 }
 

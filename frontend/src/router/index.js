@@ -28,6 +28,11 @@ const router = createRouter({
       name: 'movieAdd',
       component: () => import('../views/MovieAddView.vue'),
     },
+    {
+      path: '/secret-admin/lists',
+      name: 'manageLists',
+      component: () => import('../views/ManageListView.vue'),
+    },
   ],
 });
 
