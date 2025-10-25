@@ -160,21 +160,20 @@ router.put('/:id/voting/pick-winner', async (req, res) => {
 
     const winningEntry = mostVotes[Math.floor(Math.random() * mostVotes.length)];
 
-
     // TODO: Check if movie has already been watched
     const movie = await prisma.movie.update({
       where: { id: winningEntry.movieId },
       data: { roundWatched: list.votingRound },
     });
 
-    await prisma.list.update({
+    const updatedList = await prisma.list.update({
       where: { id: list.id, active: true, votingActive: true },
       data: { votingActive: false },
     });
 
     // TODO: Push notification
     
-    res.status(200).json(movie);
+    res.status(200).json({ movie, list: updatedList });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
