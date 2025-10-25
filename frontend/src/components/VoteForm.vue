@@ -73,7 +73,7 @@ onMounted(async () => {
     <LoadingSpinner v-if="loading" class="loading-spinner" />
     <template v-else>
       <h2 class="no-fav-text" v-if="!hasFavorites">
-        Select some favorites from the <RouterLink class="link" :to="{ name: 'list' }">Movies List</RouterLink> vote.
+        Select some favorites from the <RouterLink class="link" :to="{ name: 'list' }">Movies List</RouterLink> to vote.
       </h2>
       <div class="grid-wrapper" v-else>
         <h2>Select up to {{ maxVotes }} movies and vote below:</h2>
@@ -94,6 +94,10 @@ onMounted(async () => {
 <style scoped>
 section {
   padding: 16px 0;
+}
+
+.link {
+  color: inherit;
 }
 
 h2 {

@@ -30,19 +30,16 @@ const sortOrder = ref('asc');
 const movieDetail = ref(null);
 
 const setScrollLock = (locked = true) => {
-  const $elements = document.querySelectorAll('body');
-  if (!$elements || !$elements.length) {
+  const $scrollEl = document.getElementById('app-container');
+
+  if (!$scrollEl) {
     throw new Error('Window container not found.');
   }
 
   if (locked) {
-    $elements.forEach(($el) => {
-      $el.style.setProperty('overflow-y', 'hidden');
-    });
+    $scrollEl.style.setProperty('overflow-y', 'hidden');
   } else {
-    $elements.forEach(($el) => {
-      $el.style.removeProperty('overflow-y');
-    });
+    $scrollEl.style.removeProperty('overflow-y');
   }
 }
 
@@ -129,7 +126,6 @@ const sortedMovies = computed(() => {
 
 <style scoped>
 .grid-view {
-  padding-bottom: 80px;
   position: relative;
 }
 

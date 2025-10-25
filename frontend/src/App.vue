@@ -7,7 +7,7 @@ import AppInitializer from './components/AppInitializer.vue';
 
 <template>
   <AppInitializer>
-    <div class="app">
+    <div class="app" id="app-container">
       <RouterView class="app-body" />
       <nav class="app-nav">
         <ul>
@@ -31,8 +31,9 @@ import AppInitializer from './components/AppInitializer.vue';
 
 <style scoped>
 .app {
-  height: 100%;
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow-y: auto;
+  padding-bottom: 88px;
 }
 
 .app-nav {
@@ -70,8 +71,9 @@ import AppInitializer from './components/AppInitializer.vue';
 .app-nav ul {
   align-items: flex-start;
   background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px) grayscale(80%);
   border-radius: 16px;
+  box-shadow: inset 0 0 32px rgba(0, 0, 0, .8);
   color: white;
   display: flex;
   justify-content: space-around;

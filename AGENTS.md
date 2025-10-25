@@ -39,12 +39,39 @@ A full-stack application for voting on movies during movie marathons. Users can 
   - `favorites.js` - Favorites state
   - `list.js` - Current list state
   - `votes.js` - Voting state
+- `src/switchboard/` - API communication layer
+  - `index.js` - Wrapper functions for all backend API endpoints
+    - Centralized fetch configuration with device ID header injection
+    - Environment-based API URL configuration (dev/production)
+    - All API calls go through these wrapper functions
 - `src/views/` - Page components
   - `GridView.vue` - Main movie grid view
   - `VotingView.vue` - Voting interface
   - `RankedView.vue` - Movie standings and watched list
   - `MovieAddView.vue` - Admin form for adding movies
 - `src/config.json` - Hardcoded list ID (only 1 active list at a time)
+
+### API Communication Pattern
+
+The frontend communicates with the backend through a **switchboard pattern** implemented in `src/switchboard/index.js`:
+
+- **Centralized API Layer**: All backend API calls are wrapped in simple functions exported from the switchboard
+- **Device ID Injection**: Each request automatically includes a device ID in the `X-STAT-deviceId` header for user identification
+- **Environment Configuration**: API base URL is configured via `VITE_API_BASE_URL` environment variable
+  - Defaults to `localhost:3000` in development
+  - Can be configured for network access (e.g., `http://192.168.1.58:3000/api`)
+  - Uses Railway production URL in production builds
+- **Fetch Wrapper**: Custom `fetcher` function handles all HTTP requests with consistent headers and configuration
+- **Isolation**: Components and stores import and call these wrapper functions rather than making direct fetch calls
+
+**Example usage**:
+
+```javascript
+import { getList, addFavorite } from '../switchboard';
+
+const list = await getList(listId);
+await addFavorite(movieId);
+```
 
 ## Core Features
 
