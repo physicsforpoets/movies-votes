@@ -7,6 +7,9 @@ import { useFavoritesStore } from '../stores/favorites';
 import MovieDetail from '../components/MovieDetail.vue';
 import LoadingSpinner from '../components/LoadingSpinner.vue';
 
+import appHeroUrl from '@/assets/img/app-hero.png';
+import appTitleUrl from '@/assets/img/app-title.png';
+
 import config from '../config.json';
 
 // Icons
@@ -85,9 +88,9 @@ onMounted(async () => {
 
 <template>
   <article class="grid-view">
-    <img src="/img/app-hero.png" alt="" class="hero-bg" />
+    <img :src="appHeroUrl" alt="" class="hero-bg" />
     <div class="app-hero">
-      <img src="/img/app-title.png" alt="" />
+      <img :src="appTitleUrl" alt="" />
     </div>
     <LoadingSpinner v-if="loading" class="loading-spinner" />
     <template v-else>
