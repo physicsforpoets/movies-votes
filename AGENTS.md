@@ -54,7 +54,7 @@ A full-stack application for voting on movies during movie marathons. Users can 
 - View movie details including description, ratings, trailers, and reviews
 - Mark movies as favorites
 - Filter and sort movies by title or release date
-- Mark movies as watched/unwatched
+- Mark movies as watched/unwatched (watched movies become ineligible for voting)
 - TMDB integration for additional movie metadata
 
 ### Favorites System
@@ -70,6 +70,7 @@ A full-stack application for voting on movies during movie marathons. Users can 
 - **Active Rounds**: Only one voting round is active at a time
 - **Standings**: Movies ranked by vote count
 - Users see results when voting round is active but they've already voted
+- **Watched Status**: Movies marked as watched are no longer eligible for voting
 
 ### User Management
 

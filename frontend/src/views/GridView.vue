@@ -42,12 +42,31 @@ const sortOrder = ref('asc');
 // Detail View
 const movieDetail = ref(null);
 
+const setScrollLock = (locked = true) => {
+  const $elements = document.querySelectorAll('body');
+  if (!$elements || !$elements.length) {
+    throw new Error('Window container not found.');
+  }
+
+  if (locked) {
+    $elements.forEach(($el) => {
+      $el.style.setProperty('overflow-y', 'hidden');
+    });
+  } else {
+    $elements.forEach(($el) => {
+      $el.style.removeProperty('overflow-y');
+    });
+  }
+}
+
 const onMovieDetailClick = (movie) => {
+  setScrollLock(true);
   movieDetail.value = movie;
 };
 
 const oonMovieDetailClose = () => {
   movieDetail.value = null;
+  setScrollLock(false);
 };
 
 /**
@@ -82,6 +101,12 @@ onMounted(async () => {
   loading.value = true;
   await getList(listId);
   await getMyFavorites(listId);
+
+  // setTimeout(() => {
+  //   console.log('opening movie');
+  //   onMovieDetailClick(movies.value[0]);
+  // }, 5000);
+
   loading.value = false;
 });
 </script>
@@ -121,7 +146,9 @@ onMounted(async () => {
         </ul>
       </div>
 
-      <MovieDetail v-if="movieDetail" :movie="movieDetail" @close="oonMovieDetailClose" />
+      <Transition name="movie-detail">
+        <MovieDetail v-if="movieDetail" :movie="movieDetail" @close="oonMovieDetailClose" />
+      </Transition>
     </template>
   </article>
 </template>
@@ -237,5 +264,15 @@ ul.movies-grid>li {
   position: fixed;
   top: 50%;
   transform: translate(-50%, -50%);
+}
+
+.movie-detail-enter-active,
+.movie-detail-leave-active {
+  transition: opacity 150ms;
+}
+
+.movie-detail-enter-from,
+.modal-leave-to {
+  opacity: 0;
 }
 </style>

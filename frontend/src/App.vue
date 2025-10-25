@@ -37,9 +37,11 @@ import ListIcon from './components/icons/ListIcon.vue';
   left: 0;
   position: fixed;
   width: 100%;
+  z-index: 800;
 }
 
 .app-nav .link {
+  -webkit-tap-highlight-color: transparent;
   align-items: center;
   color: white;
   display: flex;
@@ -49,6 +51,7 @@ import ListIcon from './components/icons/ListIcon.vue';
   font-weight: var(--mv-fw-bold);
   opacity: 0.6;
   text-decoration: none;
+  transition: opacity 300ms ease-in-out;
 }
 
 .app-nav .link.router-link-active {

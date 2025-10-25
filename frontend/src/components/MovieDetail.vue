@@ -104,21 +104,9 @@ const onWatchedClick = () => {
 // Lifecycle
 
 onMounted(async () => {
-  // document.body.style.overflowY = 'hidden';
-  // document.documentElement.style.overflowY = 'hidden';
-  document.querySelector('body').classList.add('noscroll');
-  document.querySelector('html').classList.add('noscroll');
-
   // Get TMDB data
   lookupData.value = await lookupMovie(props.movie.tmdbId);
   isReady.value = true;
-});
-
-onBeforeUnmount(() => {
-  // document.body.style.overflowY = 'auto';
-  // document.documentElement.style.overflowY = 'auto';
-  document.querySelector('body').classList.remove('noscroll');
-  document.querySelector('html').classList.remove('noscroll');
 });
 </script>
 
@@ -126,72 +114,70 @@ onBeforeUnmount(() => {
   <div class="movie-detail">
     <div class="protection"></div>
     <LoadingSpinner v-if="!isReady" class="loading-spinner" />
-    <div v-else class="modal">
-      <div class="hero">
-        <img class="backdrop" :src="lookupData.secureBackdropUrl" alt="" />
-        <div class="details-container">
-          <div class="details">
-            <h2 class="title">
-              {{ movie.title }}
-              <ScarySkull v-if="movie.scary" class="scary-skull" />
-            </h2>
-            <ul class="meta">
-              <li>{{ formattedReleaseDate }}</li>
-              <li><span class="rating">{{ RATINGS[movie.rating] }}</span></li>
-              <li>{{ formattedRuntime }}</li>
-            </ul>
+    <Transition name="movie-detail">
+      <div v-if="isReady" class="modal">
+        <div class="hero">
+          <img class="backdrop" :src="lookupData.secureBackdropUrl" alt="" />
+          <div class="details-container">
+            <div class="details">
+              <h2 class="title">
+                {{ movie.title }}
+                <ScarySkull v-if="movie.scary" class="scary-skull" />
+              </h2>
+              <ul class="meta">
+                <li>{{ formattedReleaseDate }}</li>
+                <li><span class="rating">{{ RATINGS[movie.rating] }}</span></li>
+                <li>{{ formattedRuntime }}</li>
+              </ul>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn-close" @click="emit('close')">
+              <CloseIcon />
+            </button>
+            <button class="btn-favorite" @click="onFavoriteClick">
+              <HeartOn v-if="isInFavorites" />
+              <HeartOff v-else />
+            </button>
           </div>
         </div>
-        <button class="btn-close" @click="emit('close')">
-          <CloseIcon />
-        </button>
-        <ul class="actions">
-          <li class="favorite">
-            <button v-if="isInFavorites" @click="onFavoriteClick">
-              <HeartOn />
+        <section class="description">
+          <p>{{ movie.description }}</p>
+          <div class="watch">
+            <div class="services">
+              Available On:
+              <ul class="service-list">
+                <li v-for="service in movie.services" :key="service.id">
+                  <img :src="`/img/services/${service.logoUrl}`" alt="" />
+                </li>
+              </ul>
+            </div>
+            <button v-if="movie.watched" class="mark-watched" @click="onWatchedClick">
+              <EyeOn /> Mark Unwatched
             </button>
-            <button v-else @click="onFavoriteClick">
-              <HeartOff />
+            <button v-else class="mark-watched" @click="onWatchedClick">
+              <EyeOff /> Mark Watched
             </button>
-          </li>
-        </ul>
+          </div>
+        </section>
+        <section v-if="trailers && trailers.length" class="trailers">
+          <h3>Trailers</h3>
+          <iframe v-for="trailer in trailers" :key="trailer.key"
+            :src="`https://www.youtube.com/embed/${trailer.key}`"></iframe>
+        </section>
+        <section v-if="reviews && reviews.length" class="reviews">
+          <h3>Reviews</h3>
+          <ul class="review-list">
+            <li v-for="review in reviews" :key="`review-${review.id}`">
+              <a :href="review.url" target="_blank" ref="noreferrer noopener">
+                <p class="content">&ldquo;{{ review.content }}&rdquo;</p>
+                <div class="author">{{ review.author }}</div>
+              </a>
+            </li>
+          </ul>
+        </section>
       </div>
-      <section class="description">
-        <p>{{ movie.description }}</p>
-        <div class="watch">
-          <div class="services">
-            Available On:
-            <ul class="service-list">
-              <li v-for="service in movie.services" :key="service.id">
-                <img :src="`/img/services/${service.logoUrl}`" alt="" />
-              </li>
-            </ul>
-          </div>
-          <button v-if="movie.watched" class="mark-watched" @click="onWatchedClick">
-            <EyeOn /> Mark Unwatched
-          </button>
-          <button v-else class="mark-watched" @click="onWatchedClick">
-            <EyeOff /> Mark Watched
-          </button>
-        </div>
-      </section>
-      <section v-if="trailers && trailers.length" class="trailers">
-        <h3>Trailers</h3>
-        <iframe v-for="trailer in trailers" :key="trailer.key"
-          :src="`https://www.youtube.com/embed/${trailer.key}`"></iframe>
-      </section>
-      <section v-if="reviews && reviews.length" class="reviews">
-        <h3>Reviews</h3>
-        <ul class="review-list">
-          <li v-for="review in reviews" :key="`review-${review.id}`">
-            <a :href="review.url" target="_blank" ref="noreferrer noopener">
-              <p class="content">&ldquo;{{ review.content }}&rdquo;</p>
-              <div class="author">{{ review.author }}</div>
-            </a>
-          </li>
-        </ul>
-      </section>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -214,6 +200,7 @@ onBeforeUnmount(() => {
 .protection {
   backdrop-filter: blur(10px);
   background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
 }
 
 .loading-spinner {
@@ -229,6 +216,7 @@ onBeforeUnmount(() => {
   border-radius: 10px;
   padding: 0 0 8px;
   position: relative;
+  z-index: 1500;
 }
 
 .hero,
@@ -251,20 +239,6 @@ img.backdrop {
   position: absolute;
   top: 0;
   width: 100%;
-}
-
-.btn-close {
-  appearance: none;
-  background: none;
-  border: none;
-  border-radius: 0;
-  display: block;
-  height: 28px;
-  left: 12px;
-  padding: 0;
-  position: absolute;
-  top: 12px;
-  width: 28px;
 }
 
 .btn-close svg {
@@ -346,36 +320,24 @@ section.description p {
 
 .actions {
   align-items: center;
-  background: rgb(0, 0, 0, 0.75);
-  border-radius: 5px;
   display: flex;
-  gap: 8px;
-  list-style: none;
-  padding: 4px 8px;
+  justify-content: space-between;
+  padding: 16px;
   position: absolute;
-  right: 12px;
-  top: 12px;
-}
-
-.actions>li {
-  margin: 0;
-  padding: 0;
+  top: 0;
+  width: 100%;
 }
 
 .actions button {
   appearance: none;
-  background: none;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
   border: none;
-  border-radius: 0;
-  padding: 0;
+  border-radius: 8px;
+  padding: 3px 5px;
 }
 
-.actions svg {
-  height: 28px;
-  width: 28px;
-}
-
-.actions .favorite svg {
+.actions button svg {
   height: 22px;
   width: 22px;
 }
@@ -476,5 +438,16 @@ section.trailers iframe {
 .review-list .author {
   font-weight: var(--mv-fw-semibold);
   margin-top: 8px;
+}
+
+.movie-detail-enter-active,
+.movie-detail-leave-active {
+  transition: opacity 300ms, transform 300ms;
+}
+
+.movie-detail-enter-from,
+.movie-detail-leave-to {
+  opacity: 0;
+  transform: translateY(24px);
 }
 </style>
