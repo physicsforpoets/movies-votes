@@ -8,6 +8,9 @@ import LoadingSpinner from '../components/LoadingSpinner.vue';
 import VoteForm from '../components/VoteForm.vue';
 import ResultsList from '../components/ResultsList.vue';
 
+import appHeroUrl from '@/assets/img/app-hero.png';
+import appTitleUrl from '@/assets/img/app-title.png';
+
 import config from '../config.json';
 const listId = config.listId;
 
@@ -36,8 +39,9 @@ onMounted(async () => {
 
 <template>
   <article class="voting-view">
+    <img :src="appHeroUrl" alt="" class="hero-bg" />
     <div class="view-header">
-      <img src="/img/app-title.png" alt="" />
+      <img :src="appTitleUrl" alt="" />
     </div>
     <LoadingSpinner v-if="loading" class="loading-spinner" />
     <template v-else>
@@ -49,6 +53,17 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.voting-view {
+  position: relative;
+}
+
+.hero-bg {
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
 .view-header {
   padding: 24px 0 16px;
 }

@@ -3,6 +3,9 @@ import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useListStore } from '../stores/list';
 
+import appHeroUrl from '@/assets/img/app-hero.png';
+import appTitleUrl from '@/assets/img/app-title.png';
+
 import config from '../config.json';
 const listId = config.listId;
 
@@ -36,8 +39,9 @@ const watchedMovies = computed(() => {
 
 <template>
   <div class="ranked-view">
+    <img :src="appHeroUrl" alt="" class="hero-bg" />
     <div class="view-header">
-      <img src="/img/app-title.png" alt="" />
+      <img :src="appTitleUrl" alt="" />
     </div>
 
     <!-- Ranked by Votes -->
@@ -84,6 +88,14 @@ const watchedMovies = computed(() => {
 <style scoped>
 .ranked-view {
   padding: 0 16px 80px;
+  position: relative;
+}
+
+.hero-bg {
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
 }
 
 section {
