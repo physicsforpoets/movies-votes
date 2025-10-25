@@ -181,6 +181,29 @@ router.put('/:id/voting/pick-winner', async (req, res) => {
   
 });
 
+router.put('/:id/voting/reset', async (req, res) => {
+  const listId = req.params.id;
+  try {
+    // Delete all votes for movies in this list
+    await prisma.vote.deleteMany({
+      where: {
+        movie: {
+          listId: req.params.id,
+        },
+      },
+    });
+    
+    const list = await prisma.list.update({
+      where: { id: listId },
+      data: { votingActive: false, votingRound: 0 },
+    });
+    res.status(200).json(list);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Get List Movies - DEPRECATED?
 router.get('/:id/movies', async (req, res) => {
   // TODO: Move this logic to controllers - call the 'movieController' to get movies for list

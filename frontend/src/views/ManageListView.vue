@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { getLists, startNextVotingRound, pickWinner } from '../switchboard';
+import { getLists, startNextVotingRound, pickWinner, resetVoting } from '../switchboard';
 import LoadingSpinner from '../components/LoadingSpinner.vue';
 
 const lists = ref([]);
@@ -19,6 +19,20 @@ watch(listId, async () => {
     list.value = null;
   }
 });
+
+const onResetClick = async () => {
+  if (confirm('Are you sure you want to reset voting?')) {
+    try {
+      error.value = null;
+      isPending.value = true;
+      list.value = await resetVoting(listId.value);
+    } catch (err) {
+      error.value = err.message;
+    } finally {
+      isPending.value = false;
+    }
+  }
+}
 
 const onPickWinnerClick = async () => {
   try {
@@ -72,6 +86,9 @@ onMounted(async () => {
       </p>
       <p v-if="winner">
         Last Winner: <strong>{{ winner?.title }}</strong>
+      </p>
+      <p>
+        <button @click="onResetClick">Reset Voting</button>
       </p>
     </template>
 

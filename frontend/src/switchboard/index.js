@@ -201,3 +201,18 @@ export const pickWinner = async (listId) => {
     throw error;
   }
 };
+
+export const resetVoting = async (listId) => {
+  const url = `/lists/${listId}/voting/reset`;
+  const response = await fetcher(url, {
+    method: 'PUT',
+  });
+  
+  if (response.ok) {
+    const result = await response.json();
+    return result;
+  } else {
+    const error = await response.json();
+    throw error;
+  }
+};
