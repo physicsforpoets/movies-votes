@@ -7,7 +7,7 @@ import {
  } from '../switchboard';
 
 export const useListStore = defineStore('list', () => {
-  const list = ref(null)
+  const list = ref(null);
   const movies = ref([]);
 
   async function getList (id) {
@@ -34,11 +34,25 @@ export const useListStore = defineStore('list', () => {
    }  
   }
 
+  function updateVotingRound(round) {
+    if (list.value) {
+      list.value.votingRound = round;
+    }
+  }
+
+  function setVotingActive(active) {
+    if (list.value) {
+      list.value.votingActive = active;
+    }
+  }
+
   return {
     list,
     movies,
     getList,
     getListMovies,
     setWatched,
+    updateVotingRound,
+    setVotingActive,
   };
 });

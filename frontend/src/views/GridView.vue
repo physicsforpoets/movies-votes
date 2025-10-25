@@ -20,7 +20,7 @@ defineProps({
 
 // Store mapping
 const listStore = useListStore();
-const { list, movies } = storeToRefs(listStore);
+const { movies } = storeToRefs(listStore);
 
 // Sorting
 const sortBy = ref('title'); // title or release date

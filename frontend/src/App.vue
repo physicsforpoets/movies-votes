@@ -1,22 +1,110 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { RouterView } from 'vue-router';
 import { useListStore } from './stores/list';
+import { useFavoritesStore } from './stores/favorites';
+import { useSocket } from './composables/useSocket';
 import GridIcon from './components/icons/GridIcon.vue';
 import ListIcon from './components/icons/ListIcon.vue';
 import FullScreenLoader from './components/FullScreenLoader.vue';
+import VotingStartedModal from './components/VotingStartedModal.vue';
+import VotingEndedModal from './components/VotingEndedModal.vue';
 import config from './config.json';
 
 const listStore = useListStore();
+const favoritesStore = useFavoritesStore();
+const { joinList, leaveList, onEvent } = useSocket();
 const isPending = ref(false);
+const listId = config.listId;
+
+const votingStartedDetails = ref(null);
+const votingEndedDetails = ref(null);
+
+const setScrollLock = (locked = true) => {
+  const $scrollEl = document.getElementById('app-container');
+
+  if (!$scrollEl) {
+    throw new Error('Window container not found.');
+  }
+
+  if (locked) {
+    $scrollEl.style.setProperty('overflow-y', 'hidden');
+  } else {
+    $scrollEl.style.removeProperty('overflow-y');
+  }
+}
+
+const onVotingStartedModalClose = () => {
+  votingStartedDetails.value = null;
+  setScrollLock(false);
+}
+
+const onVotingEndedModalClose = () => {
+  votingEndedDetails.value = null;
+  setScrollLock(false);
+}
+
+// Store cleanup functions
+let cleanupFunctions = [];
 
 onMounted(async () => {
+  // Cleanup any existing listeners first (in case of HMR re-mount)
+  cleanupFunctions.forEach(cleanup => cleanup());
+  cleanupFunctions = [];
+
   isPending.value = true;
+
+  // Load initial data
   await Promise.all([
-    listStore.getList(config.listId),
-    listStore.getListMovies(config.listId),
+    listStore.getList(listId),
+    listStore.getListMovies(listId),
   ]);
+
+  // Load favorites
+  await favoritesStore.getMyFavorites(listId);
+
   isPending.value = false;
+
+  // Join the list room for real-time updates AFTER data is loaded
+  joinList(listId);
+
+  // Listen for voting-started event
+  const cleanup1 = onEvent('voting-started', (data) => {
+    console.log('Voting started event received:', data);
+
+    // Update list store if it exists
+    if (listStore.list && data.listId === listId) {
+      listStore.updateVotingRound(data.round);
+      listStore.setVotingActive(true);
+      setScrollLock(true);
+      votingStartedDetails.value = data;
+    }
+  });
+
+  // Listen for voting-ended event
+  const cleanup2 = onEvent('voting-ended', (data) => {
+    console.log('Voting ended event received:', data);
+
+    // Update list store if it exists
+    if (listStore.list && data.listId === listId) {
+      listStore.updateVotingRound(data.round);
+      listStore.setVotingActive(false);
+      setScrollLock(true);
+      votingEndedDetails.value = data;
+    }
+  });
+
+  // Store cleanup functions
+  cleanupFunctions = [cleanup1, cleanup2];
+});
+
+onUnmounted(() => {
+  // Cleanup event listeners
+  cleanupFunctions.forEach(cleanup => cleanup());
+  cleanupFunctions = [];
+
+  // Leave the list room when app unmounts
+  leaveList(listId);
 });
 </script>
 
@@ -39,6 +127,10 @@ onMounted(async () => {
         </li>
       </ul>
     </nav>
+
+    <VotingStartedModal :details="votingStartedDetails" @close="onVotingStartedModalClose" />
+    <VotingEndedModal :details="votingEndedDetails" @close="onVotingEndedModalClose" />
+
     <Transition name="loader">
       <FullScreenLoader v-if="isPending" />
     </Transition>

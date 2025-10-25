@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 // import cookieParser from 'cookie-parser';
 // import { v4 as uuidv4 } from 'uuid';
 
@@ -13,6 +15,14 @@ import usersRoutes from './routes/usersRoutes.js';
 import votesRoutes from './routes/votesRoutes.js';
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: true,
+    credentials: true,
+  },
+});
+
 const port = process.env.PORT || 3000;
 
 // TODO: Auth protect 'admin' routes
@@ -46,8 +56,34 @@ app.use('/api/services', servicesRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/votes', votesRoutes);
 
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log(`Client connected: ${socket.id}`);
+
+  // Join a list room when client requests it
+  socket.on('join-list', (listId) => {
+    const room = `list-${listId}`;
+    socket.join(room);
+    console.log(`Socket ${socket.id} joined room: ${room}`);
+  });
+
+  // Leave a list room
+  socket.on('leave-list', (listId) => {
+    const room = `list-${listId}`;
+    socket.leave(room);
+    console.log(`Socket ${socket.id} left room: ${room}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`Client disconnected: ${socket.id}`);
+  });
+});
+
+// Export io for use in routes via req.app.get('io')
+app.set('io', io);
+
 // TODO: Fall through all errors to be handled here
 
-app.listen(port, () => {
+httpServer.listen(port, () => {
   console.log(`App running on port ${port}`)
 });

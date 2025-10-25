@@ -4,6 +4,11 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 const router = express.Router();
 
+// Helper function to get io instance
+const getIo = (req) => {
+  return req.app.get('io');
+};
+
 // Create List
 router.post('/', async (req, res) => {
   const { name, userId } = req.body;
@@ -68,7 +73,9 @@ router.put('/:id/voting/start-next-round', async (req, res) => {
       },
     });
 
-    // TODO: Push notification
+    // Emit socket event to list-specific room
+    const io = getIo(req);
+    io.to(`list-${id}`).emit('voting-started', { listId: id, round: list.votingRound });
 
     res.status(200).json(list);
   } catch (error) {
@@ -171,7 +178,13 @@ router.put('/:id/voting/pick-winner', async (req, res) => {
       data: { votingActive: false },
     });
 
-    // TODO: Push notification
+    // Emit socket event to list-specific room
+    const io = getIo(req);
+    io.to(`list-${listId}`).emit('voting-ended', { 
+      listId: listId, 
+      winner: movie,
+      round: list.votingRound 
+    });
     
     res.status(200).json({ movie, list: updatedList });
   } catch (error) {
@@ -190,6 +203,15 @@ router.put('/:id/voting/reset', async (req, res) => {
         movie: {
           listId: req.params.id,
         },
+      },
+    });
+    
+    await prisma.movie.updateMany({
+      where: {
+        listId: listId,
+      },
+      data: {
+        roundWatched: null,
       },
     });
     
