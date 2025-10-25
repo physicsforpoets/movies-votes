@@ -22,6 +22,19 @@ npm install
 npm run dev
 ```
 
+**Note**: By default, the app connects to the API at `http://localhost:3000/api`.
+
+To access the app from another device on your home network:
+
+1. Find your computer's IP address on your network (e.g., `192.168.1.100`)
+2. Create a `.env.local` file in the frontend directory:
+   ```bash
+   echo "VITE_API_BASE_URL=http://YOUR_IP_ADDRESS:3000/api" > .env.local
+   ```
+3. Replace `YOUR_IP_ADDRESS` with your actual IP
+4. Restart the dev server
+5. Access the app from other devices using your computer's IP address
+
 ### Compile and Minify for Production
 
 ```sh

@@ -1,5 +1,5 @@
-// TODO: Get this entire URL from an environment var?
-const BASE_URL = process.env.NODE_ENV === 'production' ? 'https://movies-votes-production.up.railway.app/api' : 'http://localhost:3000/api';
+// Get API base URL from environment variable, with fallbacks for different environments
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? 'https://movies-votes-production.up.railway.app/api' : 'http://localhost:3000/api');
 
 // TODO: Try/Catch, Error Handling
 
