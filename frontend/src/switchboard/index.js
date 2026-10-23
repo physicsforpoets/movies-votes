@@ -52,6 +52,34 @@ export const getLists = async () => {
   return lists;
 };
 
+export const addList = async (list) => {
+  const url = `/lists`;
+  const response = await fetcher(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(list),
+  });
+
+  if (response.ok) {
+    const result = await response.json();
+    return result;
+  } else {
+    const error = await response.json();
+    throw error;
+  }
+};
+
+// Users
+
+export const getUsers = async () => {
+  const url = `/users`;
+  const response = await fetcher(url);
+  const users = await response.json();
+  return users;
+};
+
 // Favorites
 
 export const getMyFavorites = async (listId) => {

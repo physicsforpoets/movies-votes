@@ -20,7 +20,7 @@
 
 /* semantic color variables for this project */
 :root {
-  --color-background: var(--mv-grey-dark);
+  --color-background: #01080a;
   --color-text: var(--mv-text-light);
 }
 

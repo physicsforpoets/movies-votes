@@ -19,7 +19,6 @@ const { getMyVotes } = votesStore;
 const { myVotesForRound } = storeToRefs(votesStore);
 
 const listStore = useListStore();
-const { getList } = listStore;
 const { list } = storeToRefs(listStore);
 
 // Component State
@@ -30,7 +29,7 @@ const canUserVote = computed(() => {
 
 onMounted(async () => {
   loading.value = true;
-  await getList(listId);
+  // getList is already called in App.vue, just refresh votes
   await getMyVotes(listId);
   loading.value = false;
 });

@@ -158,18 +158,18 @@ const onSubmit = async () => {
           <label for="description">Description: <span aria-label="required">*</span></label>
           <textarea id="description" name="description" v-model="description" required></textarea>
         </p>
-        <p>
+        <div>
           <label>Services:</label>
-        <ul>
-          <li v-for="service in servicesList" :key="service.id">
-            <label :for="`service-${service.id}`">
-              <input type="checkbox" :id="`service-${service.id}`" :name="`service-${service.id}`" :value="service.id"
-                v-model="services">
-              {{ service.name }}
-            </label>
-          </li>
-        </ul>
-        </p>
+          <ul>
+            <li v-for="service in servicesList" :key="service.id">
+              <label :for="`service-${service.id}`">
+                <input type="checkbox" :id="`service-${service.id}`" :name="`service-${service.id}`" :value="service.id"
+                  v-model="services">
+                {{ service.name }}
+              </label>
+            </li>
+          </ul>
+        </div>
         <p>
           <label for="listId">Add to List:</label>
           <select name="listId" id="listId" v-model="listId">

@@ -11,9 +11,9 @@ const getIo = (req) => {
 
 // Create List
 router.post('/', async (req, res) => {
-  const { name, userId } = req.body;
+  const { name, userId, active } = req.body;
   try {
-    const list = await prisma.list.create({ data: { name, userId } });
+    const list = await prisma.list.create({ data: { name, userId, active } });
     res.status(200).json(list);
   } catch (error) {
     res.status(400).json({ message: error.message });

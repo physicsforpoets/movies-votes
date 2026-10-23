@@ -33,6 +33,11 @@ const router = createRouter({
       name: 'manageLists',
       component: () => import('../views/ManageListView.vue'),
     },
+    {
+      path: '/secret-admin/lists/add',
+      name: 'listAdd',
+      component: () => import('../views/ListAddView.vue'),
+    },
   ],
 });
 

@@ -87,9 +87,7 @@ const sortedMovies = computed(() => {
 <template>
   <article class="grid-view">
     <img :src="appHeroUrl" alt="" class="hero-bg" />
-    <div class="app-hero">
-      <img :src="appTitleUrl" alt="" />
-    </div>
+    <div class="app-hero"></div>
 
     <div class="grid-wrapper">
       <div class="grid-header">
