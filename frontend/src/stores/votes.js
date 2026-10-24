@@ -21,10 +21,10 @@ export const useVotesStore = defineStore('votes', () => {
     myVotes.value = votes;
   }
 
-  function addVotes (votes) {
-    myVotes.value = [...votes, ...myVotes.value];
-    // Assume API success
-    sbAddVotes(votes.map(vote => vote.movieId));
+  async function addVotes (movieIds) {
+    const votes = await sbAddVotes(movieIds);
+    const isNewVote = (vote) => !votes.some(v => v.movieId === vote.movieId && v.round === vote.round);
+    myVotes.value = [...votes, ...myVotes.value.filter(isNewVote)];
   }
 
   async function getResults (listId) {

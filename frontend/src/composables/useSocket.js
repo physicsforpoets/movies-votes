@@ -7,10 +7,16 @@ const socket = io(BASE_URL.replace('/api', ''), {
 });
 
 const isConnected = ref(false);
+const currentListId = ref(null);
 
 socket.on('connect', () => {
   console.log('Socket connected');
   isConnected.value = true;
+
+  // Rooms don't survive reconnects, rejoin
+  if (currentListId.value) {
+    socket.emit('join-list', currentListId.value);
+  }
 });
 
 socket.on('disconnect', () => {
@@ -19,8 +25,6 @@ socket.on('disconnect', () => {
 });
 
 export function useSocket() {
-  const currentListId = ref(null);
-  
   const onEvent = (eventName, callback) => {
     socket.on(eventName, callback);
     

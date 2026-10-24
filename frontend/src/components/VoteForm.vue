@@ -26,6 +26,7 @@ const { addVotes } = votesStore;
 const maxVotes = config.maxVotesPerRound;
 const selectedMovies = ref([]);
 const loading = ref(true);
+const error = ref(null);
 const hasFavorites = computed(() => myFavorites.value.length > 0);
 
 const isMovieSelected = computed(() => {
@@ -49,16 +50,18 @@ function onMovieClick(movie) {
   }
 }
 
-function onSubmit() {
-  loading.value = true;
-  addVotes(selectedMovies.value.map(movie => {
-    return {
-      round: list.value.votingRound,
-      movieId: movie.id,
-      movie,
-    };
-  }));
-  loading.value = false;
+async function onSubmit() {
+  try {
+    error.value = null;
+    loading.value = true;
+    await addVotes(selectedMovies.value.map(movie => movie.id));
+  } catch (err) {
+    error.value = err.message || 'Error submitting votes.';
+    // Voting may have ended since the list was loaded
+    await listStore.getList(config.listId).catch(console.error);
+  } finally {
+    loading.value = false;
+  }
 }
 
 onMounted(async () => {
@@ -78,6 +81,7 @@ onMounted(async () => {
       </h2>
       <div class="grid-wrapper" v-else>
         <h2>Select up to {{ maxVotes }} movies and vote below:</h2>
+        <p v-if="error" class="error">{{ error }}</p>
         <ul class="movies-grid">
           <li v-for="movie in unwatchedFavorites" :key="movie.id">
             <MovieCard :movie="movie" @detail-click="onMovieClick(movie)" hide-details
@@ -104,6 +108,12 @@ section {
 
 .link {
   color: inherit;
+}
+
+.error {
+  color: red;
+  margin-bottom: 16px;
+  text-align: center;
 }
 
 h2 {

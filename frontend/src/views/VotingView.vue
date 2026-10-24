@@ -19,6 +19,7 @@ const { getMyVotes } = votesStore;
 const { myVotesForRound } = storeToRefs(votesStore);
 
 const listStore = useListStore();
+const { getList } = listStore;
 const { list } = storeToRefs(listStore);
 
 // Component State
@@ -29,8 +30,11 @@ const canUserVote = computed(() => {
 
 onMounted(async () => {
   loading.value = true;
-  // getList is already called in App.vue, just refresh votes
-  await getMyVotes(listId);
+  // Refresh list too, socket events can be missed while the device is asleep
+  await Promise.all([
+    getList(listId),
+    getMyVotes(listId),
+  ]);
   loading.value = false;
 });
 </script>

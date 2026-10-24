@@ -85,12 +85,13 @@ router.post('/round/active', async (req, res) => {
       response.push({ ...data, movie });
       await prisma.vote.create({ data });
     } catch (error) {
+      // Ignore dupes, could be race conditions
       if (
-        ! error instanceof Prisma.PrismaClientKnownRequestError
+        !(error instanceof Prisma.PrismaClientKnownRequestError)
         || error.code !== 'P2002'
       ) {
         console.error(error);
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
       }
     }
   }
@@ -235,7 +236,8 @@ router.get('/list/:listId/results', async (req, res) => {
       });
     }
 
-    results = results.sort((a, b) => {
+    // Rounds without votes leave holes in the array
+    results = results.filter(Boolean).sort((a, b) => {
       return a.round < b.round ? 1 : -1;
     });
 

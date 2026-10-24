@@ -163,8 +163,14 @@ export const addVotes = async (movieIds) => {
     },
     body: JSON.stringify({ movieIds }),
   });
-  const votes = await response.json();
-  return votes;
+
+  if (response.ok) {
+    const votes = await response.json();
+    return votes;
+  } else {
+    const error = await response.json();
+    throw error;
+  }
 };
 
 export const getResults = async (listId) => {
