@@ -2,7 +2,6 @@
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useFavoritesStore } from '../stores/favorites';
-import { useListStore } from '../stores/list';
 
 import HeartOff from '../components/icons/HeartOff.vue';
 import HeartOn from '../components/icons/HeartOn.vue';
@@ -29,9 +28,6 @@ const favoritesStore = useFavoritesStore();
 const { myFavoriteIDs } = storeToRefs(favoritesStore);
 const { addFavorite, removeFavorite } = favoritesStore;
 
-const listStore = useListStore();
-const { setWatched } = listStore;
-
 const isInFavorites = computed(() => {
   return myFavoriteIDs.value.indexOf(props.movie.id) > -1;
 });
@@ -42,31 +38,19 @@ const releaseYear = computed(() => {
 });
 
 const onFavoriteClick = () => {
-  if (props.movie.watched) {
-    return;
-  }
-
   if (isInFavorites.value) {
     removeFavorite(props.movie.id);
   } else {
     addFavorite(props.movie);
   }
 };
-
-const onWatchedClick = () => {
-  let watched = true;
-  if (props.movie.watched) {
-    watched = false;
-  }
-  setWatched(props.movie.id, watched);
-}
 </script>
 
 <template>
   <div class="movie-card">
     <div class="poster-wrapper" @click="emit('detailClick')">
       <img v-if="movie.securePosterUrl" class="poster-img" :src="movie.securePosterUrl" alt="" />
-      <div v-else class="poster-text">{{ movie.name }}</div>
+      <div v-else class="poster-text">{{ movie.title }}</div>
       <SkullBanner v-if="movie.scary && !hideDetails" class="scary-skull" />
     </div>
     <div class="details" v-if="!hideDetails">
@@ -82,10 +66,6 @@ const onWatchedClick = () => {
           <HeartOff />
         </button>
       </div>
-    </div>
-    <div class="watched-wrapper" v-if="false">
-      <button v-if="movie.watched" @click="onWatchedClick">MARK UNWATCHED</button>
-      <button v-else @click="onWatchedClick">MARK WATCHED</button>
     </div>
   </div>
 </template>
@@ -112,6 +92,16 @@ const onWatchedClick = () => {
   object-fit: cover;
   object-position: center center;
   width: 100%;
+}
+
+.poster-text {
+  align-items: center;
+  display: flex;
+  font-weight: var(--mv-fw-semibold);
+  height: 100%;
+  justify-content: center;
+  padding: 8px;
+  text-align: center;
 }
 
 .poster-wrapper::after {

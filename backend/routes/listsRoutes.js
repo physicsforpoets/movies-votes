@@ -84,37 +84,6 @@ router.put('/:id/voting/start-next-round', async (req, res) => {
   }
 });
 
-// Choose Winner by Movie ID, End Round - DEPRECATED
-router.put('/:id/voting/select-movie/:movieId', async (req, res) => {
-  // TODO: Lock to list owner/admin
-
-  const id = req.params.id;
-  const movieId = req.params.movieId;
-  try {
-    // TODO: Maybe use transactions for this to rollback both in case either fail:
-    // https://www.prisma.io/docs/orm/prisma-client/queries/transactions 
-
-    // TODO: Update 'round watched'
-    const selectedMovie = await prisma.movie.update({
-      where: { id: movieId },
-      data: { watched: true },
-    });
-
-    const list = await prisma.list.update({
-      where: { id, active: true, votingActive: true },
-      data: { votingActive: false },
-    });
-
-    // TODO: Push notification
-
-    list.selectedMovie = selectedMovie;
-    res.status(200).json(list);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
-  }
-});
-
 // Choose winner by most votes, random if tie, end round
 router.put('/:id/voting/pick-winner', async (req, res) => {
   // TODO: Lock to list owner/admin
@@ -220,60 +189,6 @@ router.put('/:id/voting/reset', async (req, res) => {
       data: { votingActive: false, votingRound: 0 },
     });
     res.status(200).json(list);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Get List Movies - DEPRECATED?
-router.get('/:id/movies', async (req, res) => {
-  // TODO: Move this logic to controllers - call the 'movieController' to get movies for list
-  try {
-    const movies = await prisma.movie.findMany({
-      where: {
-        list: {
-          id: req.params.id,
-        },
-      },
-      include: {
-        services: true,
-      },
-    });
-    res.status(200).json(movies);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Get List Standings - DEPRECATED?
-router.get('/:id/standings', async (req, res) => {
-  // TODO: Move this logic to controllers - call the 'votesController' ??? to get movies for standings
-  try {
-    const movies = await prisma.movie.findMany({
-      where: {
-        watched: false,
-      },
-      include: {
-        _count: {
-          select: { votes: true },
-        },
-      },
-      orderBy: [
-        {
-          votes: {
-            _count: 'desc',
-          },
-        },
-        { sortTitle: 'desc' }
-      ],
-    });
-
-    // Filter out movies without votes
-    // Using '_count' and 'groupBy' and 'include' is apparently not supported
-    const filteredMovies = movies.filter(movie => movie?._count?.votes > 0);
-    res.status(200).json(filteredMovies);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });

@@ -174,19 +174,6 @@ export const getResults = async (listId) => {
   return results;
 };
 
-export const setWatched = async (movieId, watched = true) => {
-  const url = `/movies/${movieId}/watched`;
-  const response = await fetcher(url, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ watched }),
-  });
-  const movie = await response.json();
-  return movie;
-};
-
 export const lookupMovie = async (movieId) => {
   const url = `/lookup/movie/${movieId}/?append=videos,reviews`;
   const response = await fetcher(url);

@@ -17,6 +17,8 @@ const RATINGS = {
 
 // Page Status
 const isReady = ref(false);
+const error = ref(null);
+const addedTitle = ref(null);
 
 // Form Data
 const title = ref('');
@@ -45,6 +47,7 @@ const payload = computed(() => ({
   tmdbId: tmdbId.value,
   posterUrl: posterUrl.value,
   securePosterUrl: securePosterUrl.value,
+  trailerUrl: trailerUrl.value,
   rating: rating.value,
   scary: scary.value,
   releaseDate: releaseDate.value,
@@ -82,21 +85,26 @@ const onResultClick = async (result) => {
  */
 const onSubmit = async () => {
   try {
-    await addMovie(payload.value);
+    error.value = null;
+    addedTitle.value = null;
+    const movie = await addMovie(payload.value);
+    addedTitle.value = movie.title;
 
     // Reset form data on success...
     title.value = '';
     tmdbId.value = null;
     posterUrl.value = '';
     securePosterUrl.value = '';
+    trailerUrl.value = '';
     rating.value = 'NR';
     scary.value = false;
     releaseDate.value = '';
     description.value = '';
     services.value = [];
     listId.value = '';
-  } catch (error) {
-    console.error('Error posting movie', error);
+  } catch (err) {
+    console.error('Error posting movie', err);
+    error.value = err.message;
   }
 };
 </script>
@@ -179,6 +187,8 @@ const onSubmit = async () => {
         <p>
           <button type="submit">Add Movie</button>
         </p>
+        <p v-if="error" class="error">{{ error }}</p>
+        <p v-if="addedTitle">Added <strong>{{ addedTitle }}</strong>.</p>
       </fieldset>
     </form>
   </div>
@@ -191,5 +201,9 @@ const onSubmit = async () => {
 
 p {
   margin: .5em 0;
+}
+
+.error {
+  color: red;
 }
 </style>

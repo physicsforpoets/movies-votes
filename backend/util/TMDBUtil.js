@@ -67,8 +67,10 @@ export default class TMDBUtil {
     // TODO: Try/Catch
     const response = await fetch(url);
     const movie = await response.json();
-    movie.backdropUrl = `${config.images.base_url}w1280${movie.backdrop_path}`;
-    movie.secureBackdropUrl = `${config.images.secure_base_url}w1280${movie.backdrop_path}`;
+    if (movie.backdrop_path) {
+      movie.backdropUrl = `${config.images.base_url}w1280${movie.backdrop_path}`;
+      movie.secureBackdropUrl = `${config.images.secure_base_url}w1280${movie.backdrop_path}`;
+    }
 
     // TODO: Parse in full poster URLs, pick out trailers, etc.
     return movie;

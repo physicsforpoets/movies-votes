@@ -2,7 +2,6 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { 
   getList as sbGetList,
-  setWatched as sbSetWatched,
   getListMovies as sbGetListMovies,
  } from '../switchboard';
 
@@ -16,22 +15,6 @@ export const useListStore = defineStore('list', () => {
 
   async function getListMovies (id) {
     movies.value = await sbGetListMovies(id);
-  }
-
-  function setWatched (movieId, watched = true) {
-   let targetMovie = movies.value.find(movie => movie.id === movieId);
-   if (targetMovie) {
-    // Assume API success
-    targetMovie.watched = watched;
-    const updatedMovies = [
-      ...movies.value.filter(movie => movie.id !== targetMovie.id),
-      targetMovie,
-    ];
-    movies.value = updatedMovies;
-    sbSetWatched(movieId, watched);
-   } else {
-    console.warn('Movie not found in store.');
-   }  
   }
 
   function updateVotingRound(round) {
@@ -51,7 +34,6 @@ export const useListStore = defineStore('list', () => {
     movies,
     getList,
     getListMovies,
-    setWatched,
     updateVotingRound,
     setVotingActive,
   };

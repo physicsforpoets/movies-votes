@@ -3,14 +3,11 @@ import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useFavoritesStore } from '../stores/favorites';
 
-import { useListStore } from '../stores/list';
 import { lookupMovie } from '../switchboard';
 
 import LoadingSpinner from './LoadingSpinner.vue';
 import HeartOff from '../components/icons/HeartOff.vue';
 import HeartOn from '../components/icons/HeartOn.vue';
-import EyeOff from '../components/icons/EyeOff.vue';
-import EyeOn from '../components/icons/EyeOn.vue';
 import ScarySkull from '../components/icons/ScarySkull.vue';
 import CloseIcon from './icons/CloseIcon.vue';
 
@@ -33,9 +30,6 @@ const favoritesStore = useFavoritesStore();
 const { myFavoriteIDs } = storeToRefs(favoritesStore);
 const { addFavorite, removeFavorite } = favoritesStore;
 
-const listStore = useListStore();
-const { setWatched } = listStore;
-
 // Data
 const isReady = ref(false);
 const lookupData = ref(null);
@@ -57,7 +51,7 @@ const formattedReleaseDate = computed(() => {
 });
 
 const formattedRuntime = computed(() => {
-  if (!lookupData.value.runtime) {
+  if (!lookupData.value?.runtime) {
     return '';
   }
 
@@ -68,14 +62,35 @@ const formattedRuntime = computed(() => {
 });
 
 const trailers = computed(() => {
-  return lookupData.value.videos?.results.filter(video => video.site === 'YouTube' && video.type === 'Trailer') || null;
+  return lookupData.value?.videos?.results.filter(video => video.site === 'YouTube' && video.type === 'Trailer') || null;
+});
+
+// Embeddable URL for the locally stored trailer, if it's a recognizable YouTube link
+const localTrailerEmbedUrl = computed(() => {
+  if (!props.movie.trailerUrl) {
+    return null;
+  }
+
+  try {
+    const url = new URL(props.movie.trailerUrl);
+    const host = url.hostname.replace(/^(www\.|m\.)/, '');
+    let videoId = null;
+    if (host === 'youtu.be') {
+      videoId = url.pathname.slice(1);
+    } else if (host === 'youtube.com') {
+      videoId = url.searchParams.get('v') || url.pathname.match(/^\/(?:embed|shorts)\/([^/]+)/)?.[1];
+    }
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+  } catch {
+    return null;
+  }
 });
 
 const reviews = computed(() => {
   const maxChars = 300;
   const maxReviews = 3;
   // TODO: Pull random
-  return lookupData.value.reviews?.results.slice(0, maxReviews).map(review => ({
+  return lookupData.value?.reviews?.results.slice(0, maxReviews).map(review => ({
     id: review.id,
     url: review.url,
     author: review.author,
@@ -93,19 +108,17 @@ const onFavoriteClick = () => {
   }
 };
 
-const onWatchedClick = () => {
-  let watched = true;
-  if (props.movie.watched) {
-    watched = false;
-  }
-  setWatched(props.movie.id, watched);
-}
-
 // Lifecycle
 
 onMounted(async () => {
   // Get TMDB data
-  lookupData.value = await lookupMovie(props.movie.tmdbId);
+  if (props.movie.tmdbId) {
+    try {
+      lookupData.value = await lookupMovie(props.movie.tmdbId);
+    } catch (error) {
+      console.error('Error looking up movie', error);
+    }
+  }
   isReady.value = true;
 });
 </script>
@@ -117,7 +130,8 @@ onMounted(async () => {
     <Transition name="movie-detail">
       <div v-if="isReady" class="modal">
         <div class="hero">
-          <img class="backdrop" :src="lookupData.secureBackdropUrl" alt="" />
+          <img v-if="lookupData?.secureBackdropUrl || movie.securePosterUrl" class="backdrop"
+            :src="lookupData?.secureBackdropUrl || movie.securePosterUrl" alt="" />
           <div class="details-container">
             <div class="details">
               <h2 class="title">
@@ -152,18 +166,17 @@ onMounted(async () => {
                 </li>
               </ul>
             </div>
-            <button v-if="movie.watched" class="mark-watched" @click="onWatchedClick">
-              <EyeOn /> Mark Unwatched
-            </button>
-            <button v-else class="mark-watched" @click="onWatchedClick">
-              <EyeOff /> Mark Watched
-            </button>
           </div>
         </section>
         <section v-if="trailers && trailers.length" class="trailers">
           <h3>Trailers</h3>
           <iframe v-for="trailer in trailers" :key="trailer.key"
             :src="`https://www.youtube.com/embed/${trailer.key}`"></iframe>
+        </section>
+        <section v-else-if="movie.trailerUrl" class="trailers">
+          <h3>Trailer</h3>
+          <iframe v-if="localTrailerEmbedUrl" :src="localTrailerEmbedUrl"></iframe>
+          <a v-else :href="movie.trailerUrl" target="_blank" rel="noreferrer noopener">Watch Trailer</a>
         </section>
         <section v-if="reviews && reviews.length" class="reviews">
           <h3>Reviews</h3>
@@ -341,27 +354,6 @@ section.description p {
 .actions button svg {
   height: 22px;
   width: 22px;
-}
-
-button.mark-watched {
-  align-items: center;
-  appearance: none;
-  background: none;
-  border: none;
-  border-radius: 0;
-  color: inherit;
-  display: flex;
-  font-family: var(--mv-ff-sans-serif);
-  font-size: inherit;
-  font-weight: var(--mv-fw-semibold);
-  gap: 8px;
-  line-height: 1;
-  padding: 0;
-}
-
-button.mark-watched svg {
-  height: 16px;
-  width: 16px;
 }
 
 .watch {

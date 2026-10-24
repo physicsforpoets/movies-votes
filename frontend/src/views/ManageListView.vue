@@ -18,14 +18,20 @@ watch(listId, async () => {
   } else {
     list.value = null;
   }
+  winner.value = null;
 });
+
+const setList = (updatedList) => {
+  list.value = updatedList;
+  lists.value = lists.value.map(lst => lst.id === updatedList.id ? { ...updatedList } : lst);
+};
 
 const onResetClick = async () => {
   if (confirm('Are you sure you want to reset voting?')) {
     try {
       error.value = null;
       isPending.value = true;
-      list.value = await resetVoting(listId.value);
+      setList(await resetVoting(listId.value));
     } catch (err) {
       error.value = err.message;
     } finally {
@@ -38,9 +44,9 @@ const onPickWinnerClick = async () => {
   try {
     error.value = null;
     isPending.value = true;
-    const { list, movie } = await pickWinner(listId.value);
-    list.value = list;
-    winner.value = movie;
+    const result = await pickWinner(listId.value);
+    setList(result.list);
+    winner.value = result.movie;
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -52,7 +58,7 @@ const onStartClick = async () => {
   try {
     error.value = null;
     isPending.value = true;
-    list.value = await startNextVotingRound(listId.value);
+    setList(await startNextVotingRound(listId.value));
   } catch (err) {
     error.value = err.message;
   } finally {
