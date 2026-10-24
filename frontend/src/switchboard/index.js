@@ -19,6 +19,7 @@ const fetcher = (url, options = {}) => {
   const deviceId = getSessionId();
   const optionsToSend = {
     ...options,
+    cache: 'no-store',
     credentials: 'include',
     headers: {
       ...options?.headers,

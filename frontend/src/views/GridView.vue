@@ -1,12 +1,13 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useListStore } from '../stores/list';
+
+import config from '../config.json';
 
 import MovieDetail from '../components/MovieDetail.vue';
 
 import appHeroUrl from '@/assets/img/app-hero.png';
-import appTitleUrl from '@/assets/img/app-title.png';
 
 // Icons
 import MovieCard from '../components/MovieCard.vue';
@@ -20,6 +21,7 @@ defineProps({
 
 // Store mapping
 const listStore = useListStore();
+const { getListMovies } = listStore;
 const { movies } = storeToRefs(listStore);
 
 // Sorting
@@ -81,7 +83,10 @@ const sortedMovies = computed(() => {
   });
 });
 
-
+// Refresh in the background so watched status is current, socket events can be missed
+onMounted(() => {
+  getListMovies(config.listId).catch(console.error);
+});
 </script>
 
 <template>

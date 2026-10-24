@@ -54,12 +54,13 @@ onMounted(async () => {
         </table>
         <div class="my-votes">
           <h4>My Votes</h4>
-          <ul v-if="myVotesForRound(resultsRound.round)" class="movies-grid">
+          <ul v-if="myVotesForRound(resultsRound.round).length" class="movies-grid">
             <li v-for="vote in myVotesForRound(resultsRound.round)"
               :key="`round-${resultsRound.round}-my-${vote.movie.id}`">
               <MovieCard :movie="vote.movie" hide-details />
             </li>
           </ul>
+          <p v-else class="no-votes">You have not yet voted</p>
         </div>
       </div>
     </template>
@@ -156,6 +157,12 @@ table tr.watched td {
   list-style: none;
   margin: 8px 0;
   padding: 0;
+}
+
+.my-votes .no-votes {
+  font-size: 14px;
+  margin: 8px 0;
+  opacity: 0.7;
 }
 
 .my-votes ul.movies-grid>li {

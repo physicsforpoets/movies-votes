@@ -9,12 +9,26 @@ export const useListStore = defineStore('list', () => {
   const list = ref(null);
   const movies = ref([]);
 
-  async function getList (id) {
-    list.value = await sbGetList(id);
+  // In-flight fetches, so concurrent callers (App + views) share one request
+  let pendingList = null;
+  let pendingMovies = null;
+
+  function getList (id) {
+    if (!pendingList) {
+      pendingList = sbGetList(id)
+        .then(result => { list.value = result; })
+        .finally(() => { pendingList = null; });
+    }
+    return pendingList;
   }
 
-  async function getListMovies (id) {
-    movies.value = await sbGetListMovies(id);
+  function getListMovies (id) {
+    if (!pendingMovies) {
+      pendingMovies = sbGetListMovies(id)
+        .then(result => { movies.value = result; })
+        .finally(() => { pendingMovies = null; });
+    }
+    return pendingMovies;
   }
 
   function updateVotingRound(round) {

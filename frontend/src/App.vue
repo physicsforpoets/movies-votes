@@ -89,6 +89,7 @@ onMounted(async () => {
     if (listStore.list && data.listId === listId) {
       listStore.updateVotingRound(data.round);
       listStore.setVotingActive(false);
+      listStore.getListMovies(listId).catch(console.error);
       setScrollLock(true);
       votingEndedDetails.value = data;
     }
